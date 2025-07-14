@@ -1,0 +1,21 @@
+Package: nepstools
+Type: Package
+Title: Simplifies working with NEPS data
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Alexander", "Helbig",
+      email = "alexander.helbig@wzb.eu",
+      role = c("aut", "cre")
+    )
+  )
+Description: Functions that help NEPS data users to work with the scientific use files of the NEPS. Load NEPS data with german or english variable and value labels and all relevant meta data attached. Handle missings and season codes quickly and much more. 
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    dplyr,
+    haven,
+    readstata13,
+    stringr
+RoxygenNote: 7.3.2
