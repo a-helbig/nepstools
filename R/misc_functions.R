@@ -8,6 +8,20 @@
 #' @param values_to_replace Specify values that should be replaced with NA. Default are all standard NEPS missing codes.
 #'
 #' @returns A dataframe.
+#'
+#' @examples
+#' # Example with a data frame
+#' df <- data.frame(
+#'   x = c(1, -99, 3, -55, 5),
+#'   y = c(-90, 2, -28, 4, -56)
+#' )
+#' replace_values_with_na(df)
+#'
+#' # Example with a vector
+#' v <- c(1, -95, 3, -25, 5)
+#' replace_values_with_na(v)
+#'
+#'
 #' @export
 #'
 replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(-99, -90), seq(-56, -51), seq(-29, -22))) {
@@ -44,7 +58,6 @@ replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(
 }
 
 
-
 #' Replace season codes with corresponding months
 #'
 #' @param data A dataset to apply the function to.
@@ -52,6 +65,16 @@ replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(
 #' @param values_to_replace These are the season codes. Usually doesnt need to be modified.
 #'
 #' @returns A Dataframe.
+#'
+#' @examples
+#' df <- data.frame(
+#'   month_var = c(21, 22, 24, 25, 27),
+#'   other_var = c(1, 2, 3, 4, 5)
+#' )
+#' attr(df$month_var, "label") <- "Month of survey"
+#'
+#' replace_season_codes(df)
+#'
 #' @export
 #'
 replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24, 27, 30, 32)) {
@@ -93,8 +116,12 @@ replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24
 #' @param duration Specify the variable that will be used for expanding the data, usually this is a duration (of episode) variable. It needs to be a vector with only valid non-negative numbers and no NAs.
 #'
 #' @returns A Dataframe.
-#' @export
 #'
+#' @examples
+#' df <- data.frame(id = 1:3, duration = c(2, 1, 3))
+#' expand(df, duration)
+#'
+#' @export
 expand <- function(data, duration){
   duration <- substitute(duration) # makes sure the argument can be supplied without quot. marks.
   if(any(data[[duration]] < 0) | any(is.na(data[[duration]]))) stop("Please ensure the duration argument is a valid non-negative number and not NA.") # duration must be > 0 and not NA
@@ -110,7 +137,11 @@ expand <- function(data, duration){
 #' @returns A String.
 #' @export
 #'
-#' @examples question(data, "variable")
+#' @examples
+#' df <- data.frame(id = 1, dur = 1)
+#' attr(df$id, "NEPS_questiontext_de") <- "example question?"
+#' question(df, "id")
+#'
 question <- function(data, variable) {
   # Check if variable exists in data
   if (!variable %in% names(data)) {

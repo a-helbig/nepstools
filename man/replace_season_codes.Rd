@@ -23,3 +23,13 @@ A Dataframe.
 \description{
 Replace season codes with corresponding months
 }
+\examples{
+df <- data.frame(
+  month_var = c(21, 22, 24, 25, 27),
+  other_var = c(1, 2, 3, 4, 5)
+)
+attr(df$month_var, "label") <- "Month of survey"
+
+replace_season_codes(df)
+
+}

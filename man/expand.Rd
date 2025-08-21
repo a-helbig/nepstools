@@ -17,3 +17,8 @@ A Dataframe.
 \description{
 Expand episode data to monthly structure
 }
+\examples{
+df <- data.frame(id = 1:3, duration = c(2, 1, 3))
+expand(df, duration)
+
+}

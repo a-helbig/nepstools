@@ -23,3 +23,17 @@ A dataframe.
 \description{
 Set missings in dataframe to NA
 }
+\examples{
+# Example with a data frame
+df <- data.frame(
+  x = c(1, -99, 3, -55, 5),
+  y = c(-90, 2, -28, 4, -56)
+)
+replace_values_with_na(df)
+
+# Example with a vector
+v <- c(1, -95, 3, -25, 5)
+replace_values_with_na(v)
+
+
+}
