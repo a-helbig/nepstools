@@ -13,7 +13,7 @@ replace_values_with_na(
 \arguments{
 \item{data}{A dataset to apply the function to.}
 
-\item{vars}{Specify vars where missing values should be replaced with NA.}
+\item{vars}{Specify vars where missing values should be replaced with NA. If set to NULL, all variables will be used.}
 
 \item{values_to_replace}{Specify values that should be replaced with NA. Default are all standard NEPS missing codes.}
 }
@@ -22,7 +22,4 @@ A dataframe.
 }
 \description{
 Set missings in dataframe to NA
-}
-\examples{
-replace_values_with_na(data, c("var1","var2"))
 }

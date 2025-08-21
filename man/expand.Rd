@@ -17,6 +17,3 @@ A Dataframe.
 \description{
 Expand episode data to monthly structure
 }
-\examples{
-expand(data, duration)
-}

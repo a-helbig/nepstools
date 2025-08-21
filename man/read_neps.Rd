@@ -7,28 +7,25 @@
 read_neps(
   datasetpath,
   col_select = NULL,
-  english = F,
-  compact_meta = T,
-  charren = F
+  english = FALSE,
+  compact_meta = TRUE,
+  charren = FALSE
 )
 }
 \arguments{
 \item{datasetpath}{A datapath to a NEPS data file}
 
-\item{col_select}{Specify variables that will be included in the dataset. If NULL, data is being loaded with all variables available}
+\item{col_select}{Specify variables that will be included in the dataset. If set to NULL, data is being loaded with all available variables.}
 
-\item{english}{If TRUE, dataset will  be loaded with english variable names, value labels and meta info}
+\item{english}{If set to TRUE, the dataset will be loaded with English variable and value labels, and metadata. If set to FALSE, German labels and metadata will be used instead.}
 
-\item{compact_meta}{If TRUE, only a selection of important meta informattion will be added to the data: Questiontexts, Interviewertexts, Harmonization Rules and instrument variable names}
+\item{compact_meta}{If set to TRUE, only a selection of important metadata will be added to the data, including question texts, interviewer texts, harmonization rules, and instrument variable names. If set to FALSE, all available metadata will be included.}
 
-\item{charren}{If TRUE, instrument variable names will replace normal variable names}
+\item{charren}{If set to TRUE, instrument variable names will replace the standard variable names. If set to FALSE, the standard variable names will be retained.}
 }
 \value{
 A Dataframe.
 }
 \description{
 Function, that reads neps data and attracts available meta infos to each variable. Select variables with col_select, specify language: German (default) or English and lastly specify if only most important meta info (default) should be attracted or all of it.
-}
-\examples{
-read_neps(path_to_data, col_select = c("var1","var2"), english = T)
 }

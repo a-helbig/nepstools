@@ -1,25 +1,28 @@
 
 
-
-
 #' Function, that reads neps data and attracts available meta infos to each variable. Select variables with col_select, specify language: German (default) or English and lastly specify if only most important meta info (default) should be attracted or all of it.
 #'
 #' @param datasetpath A datapath to a NEPS data file
-#' @param col_select Specify variables that will be included in the dataset. If NULL, data is being loaded with all variables available
-#' @param english If TRUE, dataset will  be loaded with english variable names, value labels and meta info
-#' @param compact_meta If TRUE, only a selection of important meta informattion will be added to the data: Questiontexts, Interviewertexts, Harmonization Rules and instrument variable names
-#' @param charren If TRUE, instrument variable names will replace normal variable names
+#' @param col_select Specify variables that will be included in the dataset. If set to NULL, data is being loaded with all available variables.
+#' @param english If set to TRUE, the dataset will be loaded with English variable and value labels, and metadata. If set to FALSE, German labels and metadata will be used instead.
+#' @param compact_meta If set to TRUE, only a selection of important metadata will be added to the data, including question texts, interviewer texts, harmonization rules, and instrument variable names. If set to FALSE, all available metadata will be included.
+#' @param charren If set to TRUE, instrument variable names will replace the standard variable names. If set to FALSE, the standard variable names will be retained.
 #'
 #' @returns A Dataframe.
 #' @export
 #'
-#' @examples read_neps(path_to_data, col_select = c("var1","var2"), english = T)
-read_neps <- function(datasetpath, col_select = NULL, english = F, compact_meta = T, charren = F) {
+read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_meta = TRUE, charren = FALSE) {
+  # prevents devtools::check() from complaining about Non-standard evaluation use in dplyr functions
+  variable <- type <- value <- NULL
+
+  if (!file.exists(datasetpath)) {
+    stop("Dataset file does not exist at the specified path.")
+  }
   # read data with haven::read_dta
   if(is.null(col_select))
-    data <- read_dta(datasetpath)
+    data <- haven::read_dta(datasetpath)
   else
-    data <- read_dta(datasetpath, col_select = all_of(col_select))
+    data <- haven::read_dta(datasetpath, col_select = dplyr::all_of(col_select))
 
   # read expansionsfields with meta infos in neps data
   meta_data <- read_exp_fields(datasetpath)
@@ -95,7 +98,7 @@ read_neps <- function(datasetpath, col_select = NULL, english = F, compact_meta 
     meta <- meta[stringr::str_detect(meta, "(questiontext|interviewerinstruction|harmonization|alias)")]
   }
   meta_data <- meta_data |>
-    filter(type %in% meta)
+    dplyr::filter(type %in% meta)
 
   # attract the meta data to the data
   # Loop through each row in meta_data and retrieve variable, value and type name.
@@ -120,16 +123,20 @@ read_neps <- function(datasetpath, col_select = NULL, english = F, compact_meta 
   return(data)
 }
 
-
-# helper to extract meta info from data
+#' A helper to extract meta info from data
+#'
+#' @keywords internal
 read_exp_fields <- function(datapath, cols=NULL, attr_type=NULL, only_value=F) {
+  # prevents devtools::check() from complaining about Non-standard evaluation use in dplyr functions
+  variable <- type <- value <- NULL
+
   # Read the data with only the "ID_t" column and the first row for performance. We use the slower read.dta13 function here because it reads all attracted meta data while havens read_dta func does not
   data <- readstata13::read.dta13(datapath, select.cols = "ID_t", select.rows = 1)
   # Extract the expansion fields attribute
   exp_fields <- attr(data, "expansion.fields")
   # check if there were expansion.fields, if not throw an informative error message
   if(is.null(exp_fields) | length(exp_fields)==0){
-    stop("Cant find attracted meta data in selected dataset. Please ensure you select only NEPS datasets here.")
+    stop("Cant find attracted meta data in selected dataset. Please ensure you select only NEPS-SUF datasets here.")
   }
   # Extract variable, type, and value from the expansion fields and unite these vectors into a df
   fields_df <- data.frame(
@@ -158,7 +165,9 @@ read_exp_fields <- function(datapath, cols=NULL, attr_type=NULL, only_value=F) {
   return(fields_df)
 }
 
-# Helper to switch variable names in NEPS data to original instrument variable names. This feature is inspired by stata nepstools "charren" function. Background: During the data preparation process for the NEPS SUFs, the original variable names from the survey instruments are replaced with SUF-specific variable names. However, for some data users it may be useful to get the original instrument names. This function provides a quick way to do this, utilizing the metadata "NEPS_alias" stored within the datasets when being loaded with read_neps function.
+#' A Helper to switch variable names in NEPS data to original instrument variable names. This feature is inspired by stata nepstools "charren" function. Background: During the data preparation process for the NEPS SUFs, the original variable names from the survey instruments are replaced with SUF-specific variable names. However, for some data users it may be useful to get the original instrument names. This function provides a quick way to do this, utilizing the metadata "NEPS_alias" stored within the datasets when being loaded with read_neps function.
+#'
+#' @keywords internal
 switch_var_names <- function(data){
   # get current variable names
   vars <- names(data)

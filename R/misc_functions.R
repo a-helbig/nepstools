@@ -4,13 +4,12 @@
 #' Set missings in dataframe to NA
 #'
 #' @param data A dataset to apply the function to.
-#' @param vars Specify vars where missing values should be replaced with NA.
+#' @param vars Specify vars where missing values should be replaced with NA. If set to NULL, all variables will be used.
 #' @param values_to_replace Specify values that should be replaced with NA. Default are all standard NEPS missing codes.
 #'
 #' @returns A dataframe.
 #' @export
 #'
-#' @examples replace_values_with_na(data, c("var1","var2"))
 replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(-99, -90), seq(-56, -51), seq(-29, -22))) {
   # Case 1: If input is a dataframe
   if (is.data.frame(data)) {
@@ -49,27 +48,42 @@ replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(
 #' Replace season codes with corresponding months
 #'
 #' @param data A dataset to apply the function to.
-#' @param vars Specify vars where season codes should be replaced with months. Optional, if NULL, all vars are being taken into account, which can lead to problems in case of non-date variables.
+#' @param vars Specify vars where season codes should be replaced with months. Optional, if set to NULL, all vars are being taken into account, which can lead to problems in case of non-date variables.
 #' @param values_to_replace These are the season codes. Usually doesnt need to be modified.
 #'
 #' @returns A Dataframe.
 #' @export
 #'
-#' @examples replace_season_codes(data, c("month_var_1", "month_var_2"))
-replace_season_codes <- function(data, vars = NULL, values_to_replace=c(21,24,27,30,32)) {
-  if (is.null(vars)) {
-    for(var in names(data)) {
-      for(value in values_to_replace) {
+replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24, 27, 30, 32)) {
+  # Helper function to check if a variable has a label attribute containing "month" or "monat"
+  has_month_label <- function(x) {
+    lbl <- attr(x, "label")
+    if (is.null(lbl)) return(FALSE)
+    lbl_lower <- tolower(as.character(lbl))
+    return(grepl("month|monat", lbl_lower))
+  }
+
+  if (is.data.frame(data)) {
+    # Select variables based on label if vars not provided
+    if (is.null(vars)) {
+      vars <- names(data)[sapply(data, has_month_label)]
+    } else {
+      # Validate provided variables exist in the dataframe
+      if (!all(vars %in% names(data))) {
+        stop("Some variables specified in 'vars' are not present in the data frame.")
+      }
+    }
+
+    # actual replace of month vars values by subtracting 20 from each value
+    for (var in vars) {
+      for (value in values_to_replace) {
         data[[var]][data[[var]] == value] <- value - 20
       }
     }
   } else {
-    for(var in vars) {
-      for(value in values_to_replace) {
-        data[[var]][data[[var]] == value] <- value -20
-      }
-    }
+    stop("Input data must be a data frame.")
   }
+
   return(data)
 }
 
@@ -81,7 +95,6 @@ replace_season_codes <- function(data, vars = NULL, values_to_replace=c(21,24,27
 #' @returns A Dataframe.
 #' @export
 #'
-#' @examples expand(data, duration)
 expand <- function(data, duration){
   duration <- substitute(duration) # makes sure the argument can be supplied without quot. marks.
   if(any(data[[duration]] < 0) | any(is.na(data[[duration]]))) stop("Please ensure the duration argument is a valid non-negative number and not NA.") # duration must be > 0 and not NA
