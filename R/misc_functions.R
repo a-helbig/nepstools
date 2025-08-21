@@ -100,3 +100,32 @@ expand <- function(data, duration){
   if(any(data[[duration]] < 0) | any(is.na(data[[duration]]))) stop("Please ensure the duration argument is a valid non-negative number and not NA.") # duration must be > 0 and not NA
   data[rep(seq_len(nrow(data)), data[[duration]]), 1:ncol(data)] # expanding feature
 }
+
+
+#' Prints questiontext of variable to console
+#'
+#' @param data Specify the dataset that was generated with read_neps function
+#' @param variable Specify the variable for which the question text should be printed.
+#'
+#' @returns A String.
+#' @export
+#'
+#' @examples question(data, "variable")
+question <- function(data, variable) {
+  # Check if variable exists in data
+  if (!variable %in% names(data)) {
+    stop("Variable '", variable, "' not found in the data frame.")
+  }
+
+  # Extract attribute "question" (non-exact match)
+  q_attr <- attr(data[[variable]], "NEPS_questiontext_", exact = FALSE)
+
+  # Check if attribute exists and is non-empty
+  if (is.null(q_attr) || length(q_attr) == 0) {
+    warning("Variable '", variable, "' does not have a questiontext attached")
+    return(invisible(NULL))
+  }
+
+  return(q_attr)
+}
+

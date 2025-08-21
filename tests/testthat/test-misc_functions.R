@@ -227,3 +227,40 @@ test_that("expand with a dataframe with one row and duration 1 returns the same 
   expect_equal(nrow(result), 1)
   expect_equal(result, df)
 })
+
+################################################################################
+# question func
+################################################################################
+
+test_that("prints questiontext", {
+  df <- data.frame(id = 1, dur = 1)
+  attr(df$id, "NEPS_questiontext_de") <- "example question?"
+
+  expect_equal(question(df, "id"), "example question?")
+})
+
+test_that("error if variable not in data", {
+  df <- data.frame(a = 1:3, b = letters[1:3])
+  expect_error(question(df, "c"),
+               "Variable 'c' not found in the data frame.")
+})
+
+test_that("returns attribute with partial match (non-exact)", {
+  # attribute name partially matching "NEPS_questiontext_"
+  df <- data.frame(a = 1:3)
+  attr(df$a, "NEPS_questiontext_extra") <- "Extra text"
+  expect_equal(question(df, "a"), "Extra text")
+})
+
+test_that("warns and returns NULL if attribute missing", {
+  df <- data.frame(a = 1:3)
+  expect_warning(res <- question(df, "a"), "does not have a questiontext attached")
+  expect_null(res)
+})
+
+test_that("warns and returns NULL if attribute is empty", {
+  df <- data.frame(a = 1:3)
+  attr(df$a, "NEPS_questiontext_") <- character(0)
+  expect_warning(res <- question(df, "a"), "does not have a questiontext attached")
+  expect_null(res)
+})
