@@ -9,8 +9,14 @@
 #' @param charren If set to TRUE, instrument variable names will replace the standard variable names. If set to FALSE, the standard variable names will be retained.
 #'
 #' @returns A Dataframe.
-#' @export
 #'
+#' @examples
+#' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+#' df <- read_neps(path, english = TRUE, charren = TRUE)
+#' print(names(df))
+#' attr(df$startm, "NEPS_questiontext_de")
+#'
+#' @export
 read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_meta = TRUE, charren = FALSE) {
   # prevents devtools::check() from complaining about Non-standard evaluation use in dplyr functions
   variable <- type <- value <- NULL

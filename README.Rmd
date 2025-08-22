@@ -1,0 +1,62 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# nepstools
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+This package facilitates working with R and NEPS SUF data. Its main feature — and the core of the package — is a function that efficiently reads NEPS SUF files in statas dta format. It allows you to specify German or English language, a switch to instrument variable names and access to all attached meta information on variables. It builds upon haven’s read_dta() and readstata13’s read.dta13() functions, leveraging the strengths of both. The package is inspired by the stata ado [nepstools](https://www.neps-data.de/Datenzentrum/Forschungsdaten/Datentools-f%C3%BCr-Stata) developed by the FDZ of the Lifbi in Bamberg, Germany.
+
+## Installation
+
+You can install the development version of *nepstools* like so:
+
+``` r
+remotes::install_github("nepstools", username = "a-helbig")
+```
+
+## Example
+
+We need to load a NEPS dataset that includes variable and value labels in English, and also want to access the question texts associated with the variables.
+
+Using haven::read_dta() did not provide access to the English labels or the question texts. We also tried readstata13::read.dta13(), but although it loads metadata (including English labels), these were only attached at the dataset level, not directly to the variables. Additionally, this function tends to be relatively slow when working with larger datasets.
+
+To achieve our goal, we can use the read_neps() function as demonstrated below:
+
+```{r example}
+library(nepstools)
+
+# File path to publicly available NEPS SC6 semantic structural file on gaps in lifecourse that is included in this package
+path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+
+# read data with english labels and meta
+df_neps <- read_neps(path, english = TRUE)
+# Example Variable: ts2912m - enddate (month) of gap episode
+# Print english variable label 
+attr(df_neps$ts2912m, "label")
+# Print english questiontext with convenient wrapper nepstools::question()
+question(df_neps, "ts29103")
+
+```
+
+In addition the package provides a handful of smaller functions that facilitate working with NEPS data:
+
+  1. `replace_values_with_na()`: replacing NEPS missing values with NA
+  2. `replace_season_codes()`: recoding season codes to corresponding months
+  3. `expand()`: expanding episode data by duration
+  4. `question()`: convenient wrapper for question texts
+
+For more details, please checkout the *nepstools* vignette.

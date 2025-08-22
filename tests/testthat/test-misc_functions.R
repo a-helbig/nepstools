@@ -1,13 +1,11 @@
-datapath2 <- "C:/r_projects/sc6-prep-personyear/raw-data2/SC6_spGap_D_14-0-0.dta"
-
 ################################################################################
 # test: replace_value_with_na
 ################################################################################
 
 test_that("neps missing codes are replaced with NA in all variables", {
   # Call read_neps function to get the dataframe
-  df1 <- replace_values_with_na(read_neps(datapath2))
-  df2 <- read_neps(datapath2)
+  df1 <- replace_values_with_na(semantic_neps_gap)
+  df2 <- semantic_neps_gap
 
   # Define the NEPS missing values vector
   neps_miss_vals <- c(seq(-99, -90), seq(-56, -51), seq(-29, -22))
@@ -117,7 +115,7 @@ test_that("Works with multiple vars selected", {
 ################################################################################
 test_that("are all season codes in all month variables, and only in them, replaced with -20?", {
   # Call read_neps function to get the dataframe
-  df1 <- replace_season_codes(read_neps(datapath2))
+  df1 <- replace_season_codes(semantic_neps_gap)
 
   # Helper function to check if a variable has a label attribute containing "month" or "monat"
   has_month_label <- function(x) {
@@ -141,8 +139,8 @@ test_that("are all season codes in all month variables, and only in them, replac
 
 # test: replace_season_codes
 test_that("non-month variables remain unchanged after replacement", {
-  df_original <- read_neps(datapath2)
-  df_replaced <- replace_season_codes(df_original)
+  df_original <- semantic_neps_gap
+  df_replaced <- replace_season_codes(semantic_neps_gap)
 
   has_month_label <- function(x) {
     lbl <- attr(x, "label")
@@ -237,6 +235,13 @@ test_that("prints questiontext", {
   attr(df$id, "NEPS_questiontext_de") <- "example question?"
 
   expect_equal(question(df, "id"), "example question?")
+})
+
+test_that("prints questiontext gapfile", {
+  df <- semantic_neps_gap
+  attr(df$ts2911m, "NEPS_questiontext_de") <- "Von wann bis wann waren Sie <h_modak>?"
+
+  expect_equal(question(df, "ts2911m"), "Von wann bis wann waren Sie <h_modak>?")
 })
 
 test_that("error if variable not in data", {

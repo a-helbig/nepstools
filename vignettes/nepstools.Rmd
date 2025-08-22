@@ -1,0 +1,160 @@
+---
+title: "nepstools"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{nepstools}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(nepstools)
+
+# File path to publicly available NEPS semantic file on gaps in lifecourse that is included in this package
+path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+```
+
+## Introduction
+The nepstools package provides convenient functions to work with NEPS Scientific Use Files (SUFs). It is inspired by the stata ado nepstools developed by the Forschungsdatenzentrum at LifBi in Bamberg. 
+
+This vignette introduces key functionalities for:
+
+- Reading NEPS data files with read_neps()
+- Replacing NEPS-specific missing codes with NA with replace_values_with_na()
+- Recoding season codes to corresponding calendar months with replace_season_codes()
+- Expanding episode data by episode duration with expand()
+- Extracting variable question texts with question()
+
+
+## 1. Reading NEPS data 
+The core of this package is the **read_neps()** function. It reads data from a NEPS Scientific Use File in **dta-format** and attaches associated metadata such as labels, question texts, and harmonization rules. 
+
+At its core, the function uses read_dta() from the tidyverse package *haven*, which is very performant with larger datasets compared to other dta-readers. It does however not support reading (all) attached meta information in the NEPS-SUF-Files.
+For this task the function read.dta13() from the package *readstata13* is utilized. Since it does not have to read the rows of the dataset to get access to the meta information, performance with large datasets isnt an issue.
+
+<!-- Arguments supported by read_neps(): -->
+<!-- 1. datasetpath: Path to the NEPS .dta file. -->
+<!-- 2. col_select: Optional vector of variables to select. -->
+<!-- 3. english: Logical, if TRUE loads English labels and metadata (The default value FALSE will load labels and metadata in German). -->
+<!-- 4. compact_meta: Logical, controls whether to load only key metadata or all of it. -->
+<!-- 5. charren: Logical, if TRUE, replaces variable names with original instrument names. -->
+
+When argument *english* is set to TRUE, all variable and value labels as well as attached meta information will be switched from German (default) to English:
+```{r }
+# read data with english labels and meta
+df_neps <- read_neps(path, english = TRUE)
+# Access label and questiontext attribute of a variable
+attr(df_neps$ts2912m, "label")
+attr(df_neps$ts2912m, "NEPS_questiontext")
+
+# read data with german labels and meta
+df_neps <- read_neps(path, english = FALSE)
+# Access label and questiontext attribute of a variable
+attr(df_neps$ts2912m, "label")
+attr(df_neps$ts2912m, "NEPS_questiontext")
+```
+
+When argument *compact_meta* is set to TRUE (default), only the following meta infos will be attached if available: questiontext, interview-instruction-text, harmonization rule and alias. If set to FALSE, all available meta infos will be attached.
+
+```{r }
+# read data with minimum available meta info
+df_neps <- read_neps(path, compact_meta = TRUE)
+# show how many attributes are being attached to the data
+length(attributes(df_neps$ts2912m))
+
+# read data with all available meta info
+df_neps <- read_neps(path, compact_meta = FALSE)
+# show how many attributes are being attached to the data
+length(attributes(df_neps$ts2912m))
+```
+
+When the argument *charren* is set to TRUE, variable names are replaced with instrument names where available. These instrument names may be more intuitive for some NEPS data users, as they are often more self-explanatory.
+
+```{r }
+# read data with minimum available meta info
+df_neps <- read_neps(path, charren = TRUE)
+# print names of dataset
+print(df_neps)
+
+# read data with all available meta infos
+df_neps <- read_neps(path, charren = FALSE)
+# print names of dataset
+print(df_neps)
+```
+
+## 2. Replacing NEPS missing values with NA
+NEPS datasets use various negative codes to indicate different types of missing values. The replace_values_with_na() function replaces these codes by NA for easier handling in R.
+```{r dataframe}
+# read data with variables: "ID" and "enddate of episode"
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+
+# create some artificial datapoints 
+artificial_datapoints <- data.frame(
+  ID_t = c(1, 2, 3, 4, 5),
+  ts2912m = c(-97, 12, NA, 4, -98)
+)
+
+# add these artificial datapoints to the empty neps dataset
+df_neps <- rbind(df_neps, artificial_datapoints)
+print(df_neps)
+
+# now use the replace_values_with_na function
+df_clean <- replace_values_with_na(df_neps)
+print(df_clean)
+```
+
+If you do want all variables to be considered in the function, you can specify variables in the *vars* argument. IN addition you can provide custom missing value codes to be considered with the argument *values_to_replace*. Note, that the function also works on vectors.
+
+## 3. Recoding season codes to corresponding months
+In the NEPS study, respondents can answer questions on the date of events with seasons instead of exact months. The codes for these seasons are 21,24,27,30 and 32 and correspond to January (1 + 20), April (4 + 20) and so on. 
+Use the function replace_season_codes() to revert these season codes to standard month codes. 
+
+```{r }
+# read data with variables: "ID" and "enddate of episode"
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+
+# create some artificial datapoints 
+artificial_datapoints <- data.frame(
+  ID_t = c(1, 2, 3, 4, 5),
+  ts2912m = c(24, 12, 32, 4, -98)
+)
+
+# add these artificial datapoints to the empty neps dataset
+df_neps <- rbind(df_neps, artificial_datapoints)
+print(df_neps)
+
+df_month_recoded <- replace_season_codes(df_neps)
+print(df_month_recoded)
+```
+
+Note that if the *vars* argument is NULL (the default), only variables with label attributes containing "month" or "monat" are processed. Alternatively, you can explicitly specify which variables to include.
+
+## 4. Expanding episode data by duration
+Often, episodes or spells are recorded with durations in months or years. The expand() function replicates rows according to the length of a specified duration variable. This function is inspired by statas expand function.
+
+```{r }
+df_episodes <- data.frame(id = 1:3, duration = c(2, 1, 3))
+
+expanded_df <- expand(df_episodes, duration)
+print(expanded_df)
+```
+
+## 5. Extracting question texts
+NEPS variables come with attached metadata, including question texts in German or English. Use the convenient wrapper question() to print the question text for a specified variable.
+
+```{r question}
+# read data with variables: "ID" and "enddate of episode"
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+
+question(df_neps, "ts2912m")
+```
+
+
+
