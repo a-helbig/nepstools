@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_neps.R
 \name{read_neps}
 \alias{read_neps}
-\title{Function, that reads neps data and attracts available meta infos to each variable. Select variables with col_select, specify language: German (default) or English and lastly specify if only most important meta info (default) should be attracted or all of it.}
+\title{Read NEPS SUF files in .dta format}
 \usage{
 read_neps(
   datasetpath,
@@ -27,12 +27,12 @@ read_neps(
 A Dataframe.
 }
 \description{
-Function, that reads neps data and attracts available meta infos to each variable. Select variables with col_select, specify language: German (default) or English and lastly specify if only most important meta info (default) should be attracted or all of it.
+`read_neps()` reads NEPS SUF data in .dta file format and attracts available meta infos to each variable. Select variables with col_select, specify language: German (default) or English and lastly specify if only most important meta info (default) should be attracted or all of it.
 }
 \examples{
 path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
 df <- read_neps(path, english = TRUE, charren = TRUE)
 print(names(df))
-attr(df$startm, "NEPS_questiontext_de")
+attr(df$luendm, "NEPS_questiontext_")
 
 }

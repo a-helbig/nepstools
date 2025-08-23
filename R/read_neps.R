@@ -1,6 +1,7 @@
 
-
-#' Function, that reads neps data and attracts available meta infos to each variable. Select variables with col_select, specify language: German (default) or English and lastly specify if only most important meta info (default) should be attracted or all of it.
+#' Read NEPS SUF files in .dta format
+#'
+#' `read_neps()` reads NEPS SUF data in .dta file format and attracts available meta infos to each variable. Select variables with col_select, specify language: German (default) or English and lastly specify if only most important meta info (default) should be attracted or all of it.
 #'
 #' @param datasetpath A datapath to a NEPS data file
 #' @param col_select Specify variables that will be included in the dataset. If set to NULL, data is being loaded with all available variables.
@@ -14,7 +15,7 @@
 #' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
 #' df <- read_neps(path, english = TRUE, charren = TRUE)
 #' print(names(df))
-#' attr(df$startm, "NEPS_questiontext_de")
+#' attr(df$luendm, "NEPS_questiontext_")
 #'
 #' @export
 read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_meta = TRUE, charren = FALSE) {

@@ -21,18 +21,27 @@ replace_values_with_na(
 A dataframe.
 }
 \description{
-Set missings in dataframe to NA
+`replace_values_with_na()` sets NEPS specific missing codes to NA. Default missing codes are c(seq(-99, -90), seq(-56, -51), seq(-29, -22)). If only specific variables should be taken into account, use the vars argument and supply a vector of variable names.
 }
 \examples{
-# Example with a data frame
-df <- data.frame(
-  x = c(1, -99, 3, -55, 5),
-  y = c(-90, 2, -28, 4, -56)
-)
-replace_values_with_na(df)
+# Example with NEPS SC6 semantic structures spGap file
+path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+df_neps <- read_neps(path, english = TRUE, charren = TRUE)
+
+# create some artificial datapoints
+artificial_datapoints <- data.frame(
+ ID_t = c(1, 2, 3, 4, 5),
+ ts2912m = c(-97, 12, NA, 4, -98))
+
+# add these artificial datapoints to the empty neps dataset
+df_neps <- rbind(df_neps, artificial_datapoints)
+print(df_neps)
+
+df_neps_replaced <- replace_values_with_na(df_neps)
+print(df_neps_replaced)
 
 # Example with a vector
-v <- c(1, -95, 3, -25, 5)
+v <- c(1, -97, 3, -29, 5)
 replace_values_with_na(v)
 
 

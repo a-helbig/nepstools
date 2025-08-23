@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc_functions.R
 \name{expand}
 \alias{expand}
-\title{Expand episode data to monthly structure}
+\title{Expand data}
 \usage{
 expand(data, duration)
 }
@@ -15,7 +15,7 @@ expand(data, duration)
 A Dataframe.
 }
 \description{
-Expand episode data to monthly structure
+`expand()` duplicates rows by a variable specified in the duration argument. It is inspired by statas expand function.
 }
 \examples{
 df <- data.frame(id = 1:3, duration = c(2, 1, 3))

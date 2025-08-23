@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc_functions.R
 \name{question}
 \alias{question}
-\title{Prints questiontext of variable to console}
+\title{Print questiontext}
 \usage{
 question(data, variable)
 }
@@ -15,7 +15,7 @@ question(data, variable)
 A String.
 }
 \description{
-Prints questiontext of variable to console
+`question()` is a convenient wrapper for the attr() function. It prints the attached questiontext from specified variable in the variable argument to the console.
 }
 \examples{
 df <- data.frame(id = 1, dur = 1)

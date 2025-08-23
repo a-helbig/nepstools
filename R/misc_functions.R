@@ -3,6 +3,8 @@
 
 #' Set missings in dataframe to NA
 #'
+#' `replace_values_with_na()` sets NEPS specific missing codes to NA. Default missing codes are c(seq(-99, -90), seq(-56, -51), seq(-29, -22)). If only specific variables should be taken into account, use the vars argument and supply a vector of variable names.
+#'
 #' @param data A dataset to apply the function to.
 #' @param vars Specify vars where missing values should be replaced with NA. If set to NULL, all variables will be used.
 #' @param values_to_replace Specify values that should be replaced with NA. Default are all standard NEPS missing codes.
@@ -10,15 +12,24 @@
 #' @returns A dataframe.
 #'
 #' @examples
-#' # Example with a data frame
-#' df <- data.frame(
-#'   x = c(1, -99, 3, -55, 5),
-#'   y = c(-90, 2, -28, 4, -56)
-#' )
-#' replace_values_with_na(df)
+#' # Example with NEPS SC6 semantic structures spGap file
+#' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+#' df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+#'
+#' # create some artificial datapoints
+#' artificial_datapoints <- data.frame(
+#'  ID_t = c(1, 2, 3, 4, 5),
+#'  ts2912m = c(-97, 12, NA, 4, -98))
+#'
+#' # add these artificial datapoints to the empty neps dataset
+#' df_neps <- rbind(df_neps, artificial_datapoints)
+#' print(df_neps)
+#'
+#' df_neps_replaced <- replace_values_with_na(df_neps)
+#' print(df_neps_replaced)
 #'
 #' # Example with a vector
-#' v <- c(1, -95, 3, -25, 5)
+#' v <- c(1, -97, 3, -29, 5)
 #' replace_values_with_na(v)
 #'
 #'
@@ -58,7 +69,9 @@ replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(
 }
 
 
-#' Replace season codes with corresponding months
+#' Replace season codes with months
+#'
+#' `replace_season_codes()` replaces NEPS specific season codes in date variables to standard month codes. For example code 27: "Summer" will be replaced with Code 7: "July".
 #'
 #' @param data A dataset to apply the function to.
 #' @param vars Specify vars where season codes should be replaced with months. Optional, if set to NULL, all vars are being taken into account, which can lead to problems in case of non-date variables.
@@ -67,13 +80,21 @@ replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(
 #' @returns A Dataframe.
 #'
 #' @examples
-#' df <- data.frame(
-#'   month_var = c(21, 22, 24, 25, 27),
-#'   other_var = c(1, 2, 3, 4, 5)
-#' )
-#' attr(df$month_var, "label") <- "Month of survey"
+#' # Example with NEPS SC6 semantic structures spGap file
+#' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+#' df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
 #'
-#' replace_season_codes(df)
+#' # create some artificial datapoints
+#' artificial_datapoints <- data.frame(
+#'  ID_t = c(1, 2, 3, 24, 5),
+#'  ts2912m = c(-97, 24, 5, 32, 30))
+#'
+#' # add these artificial datapoints to the empty neps dataset
+#' df_neps <- rbind(df_neps, artificial_datapoints)
+#' print(df_neps)
+#'
+#' df_neps_replaced <- replace_season_codes(df_neps)
+#' print(df_neps_replaced)
 #'
 #' @export
 #'
@@ -110,8 +131,9 @@ replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24
   return(data)
 }
 
-#' Expand episode data to monthly structure
+#' Expand data
 #'
+#' `expand()` duplicates rows by a variable specified in the duration argument. It is inspired by statas expand function.
 #' @param data A dataset that will be expanded.
 #' @param duration Specify the variable that will be used for expanding the data, usually this is a duration (of episode) variable. It needs to be a vector with only valid non-negative numbers and no NAs.
 #'
@@ -123,13 +145,32 @@ replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24
 #'
 #' @export
 expand <- function(data, duration){
-  duration <- substitute(duration) # makes sure the argument can be supplied without quot. marks.
-  if(any(data[[duration]] < 0) | any(is.na(data[[duration]]))) stop("Please ensure the duration argument is a valid non-negative number and not NA.") # duration must be > 0 and not NA
-  data[rep(seq_len(nrow(data)), data[[duration]]), 1:ncol(data)] # expanding feature
+  # Check if data is a data.frame
+  if(!is.data.frame(data)) stop("The data argument must be a data.frame.")
+
+  # Capture duration as name
+  duration <- substitute(duration)
+
+  # Check if duration is a symbol (i.e., variable name)
+  if (!is.symbol(duration)) stop("The duration argument must be an unquoted variable name.")
+
+  duration_name <- as.character(duration)
+
+  # Check if duration variable exists in data
+  if (!(duration_name %in% names(data))) stop(paste0("The variable '" ,duration_name,  "', specified in the duration argument, is not in data."))
+
+  # Check if data[[duration]] is numeric and non-negative, no NA
+  if (!is.numeric(data[[duration_name]])) stop("The duration variable must be numeric.")
+  if(any(data[[duration_name]] < 0) | any(is.na(data[[duration_name]]))) stop("Please ensure the duration argument is a valid non-negative number and not NA.")
+
+  # Expand data by the duration variable
+  data[rep(seq_len(nrow(data)), data[[duration_name]]), 1:ncol(data)]
 }
 
 
-#' Prints questiontext of variable to console
+#' Print questiontext
+#'
+#' `question()` is a convenient wrapper for the attr() function. It prints the attached questiontext from specified variable in the variable argument to the console.
 #'
 #' @param data Specify the dataset that was generated with read_neps function
 #' @param variable Specify the variable for which the question text should be printed.
@@ -138,11 +179,18 @@ expand <- function(data, duration){
 #' @export
 #'
 #' @examples
-#' df <- data.frame(id = 1, dur = 1)
-#' attr(df$id, "NEPS_questiontext_de") <- "example question?"
-#' question(df, "id")
+#' # Example with NEPS SC6 semantic structures spGap file
+#' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+#' df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+#'
+#' question(df_neps, "ts2912m")
 #'
 question <- function(data, variable) {
+  # Check if data is a data.frame
+  if (!is.data.frame(data)) {
+    stop("The data argument must be a data frame.")
+  }
+
   # Check if variable exists in data
   if (!variable %in% names(data)) {
     stop("Variable '", variable, "' not found in the data frame.")

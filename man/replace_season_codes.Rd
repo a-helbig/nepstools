@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc_functions.R
 \name{replace_season_codes}
 \alias{replace_season_codes}
-\title{Replace season codes with corresponding months}
+\title{Replace season codes with months}
 \usage{
 replace_season_codes(
   data,
@@ -21,7 +21,7 @@ replace_season_codes(
 A Dataframe.
 }
 \description{
-Replace season codes with corresponding months
+`replace_season_codes()` replaces NEPS specific season codes in date variables to standard month codes. For example code 27: "Summer" will be replaced with Code 7: "July".
 }
 \examples{
 df <- data.frame(
