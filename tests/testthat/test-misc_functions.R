@@ -226,9 +226,55 @@ test_that("expand with a dataframe with one row and duration 1 returns the same 
   expect_equal(result, df)
 })
 
+
+test_that("expand preserves row order after expansion", {
+  df <- data.frame(id = c(3, 1, 2), dur = c(1, 2, 1))
+  result <- expand(df, dur)
+  expected_ids <- c(3, 1, 1, 2)
+  expect_equal(result$id, expected_ids)
+})
+
+test_that("expand errors when duration variable not in data", {
+  df <- data.frame(id = 1:2, time = c(1, 2))
+  expect_error(expand(df, dur), "The variable 'dur' specified in the duration argument is not in data.")
+})
+
+test_that("expand errors when data is not a data.frame", {
+  expect_error(expand(list(id = 1:3, dur = c(1,2,3)), dur), "The data argument must be a data.frame.")
+})
+
+test_that("expand errors when duration has non-integer numeric values", {
+  df <- data.frame(id = 1:3, dur = c(2.5, 1, 3))
+  expect_error(expand(df, dur), "The duration variable must contain integer values.")
+})
+
 ################################################################################
 # question func
 ################################################################################
+
+test_that("question works with unquoted variable name", {
+  df <- data.frame(foo = 1:3, bar = 4:6)
+  attr(df$foo, "NEPS_questiontext_") <- "Question for foo"
+
+  result <- question(df, foo)
+  expect_equal(result, "Question for foo")
+})
+
+test_that("question works with quoted variable name", {
+  df <- data.frame(foo = 1:3, bar = 4:6)
+  attr(df$foo, "NEPS_questiontext_") <- "Question for foo"
+
+  result <- question(df, "foo")
+  expect_equal(result, "Question for foo")
+})
+
+test_that("error if variable argument is neither quoted nor unquoted", {
+  df <- data.frame(foo = 1:3)
+  expect_error(question(df, 123), "The variable argument must be an unquoted or quoted variable name")
+  expect_error(question(df, list(a=1)), "The variable argument must be an unquoted or quoted variable name")
+})
+
+# --- Your existing functional tests ---
 
 test_that("prints questiontext", {
   df <- data.frame(id = 1, dur = 1)
@@ -251,7 +297,6 @@ test_that("error if variable not in data", {
 })
 
 test_that("returns attribute with partial match (non-exact)", {
-  # attribute name partially matching "NEPS_questiontext_"
   df <- data.frame(a = 1:3)
   attr(df$a, "NEPS_questiontext_extra") <- "Extra text"
   expect_equal(question(df, "a"), "Extra text")
@@ -269,3 +314,4 @@ test_that("warns and returns NULL if attribute is empty", {
   expect_warning(res <- question(df, "a"), "does not have a questiontext attached")
   expect_null(res)
 })
+

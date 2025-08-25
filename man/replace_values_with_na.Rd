@@ -11,9 +11,9 @@ replace_values_with_na(
 )
 }
 \arguments{
-\item{data}{A dataset to apply the function to.}
+\item{data}{A dataframe to apply the function to.}
 
-\item{vars}{Specify vars where missing values should be replaced with NA. If set to NULL, all variables will be used.}
+\item{vars}{Specify variables where missing values should be replaced with NA. If set to NULL, all variables will be used.}
 
 \item{values_to_replace}{Specify values that should be replaced with NA. Default are all standard NEPS missing codes.}
 }
@@ -26,7 +26,7 @@ A dataframe.
 \examples{
 # Example with NEPS SC6 semantic structures spGap file
 path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
-df_neps <- read_neps(path, english = TRUE, charren = TRUE)
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
 
 # create some artificial datapoints
 artificial_datapoints <- data.frame(

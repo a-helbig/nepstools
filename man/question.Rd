@@ -9,7 +9,7 @@ question(data, variable)
 \arguments{
 \item{data}{Specify the dataset that was generated with read_neps function}
 
-\item{variable}{Specify the variable for which the question text should be printed.}
+\item{variable}{Specify the variable for which the question text should be printed. Argument can be a string or an unquoted variable name.}
 }
 \value{
 A String.
@@ -18,8 +18,10 @@ A String.
 `question()` is a convenient wrapper for the attr() function. It prints the attached questiontext from specified variable in the variable argument to the console.
 }
 \examples{
-df <- data.frame(id = 1, dur = 1)
-attr(df$id, "NEPS_questiontext_de") <- "example question?"
-question(df, "id")
+# Example with NEPS SC6 semantic structures spGap file
+path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+
+question(df_neps, "ts2912m")
 
 }

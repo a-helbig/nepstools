@@ -7,15 +7,15 @@
 expand(data, duration)
 }
 \arguments{
-\item{data}{A dataset that will be expanded.}
+\item{data}{A dataframe.}
 
-\item{duration}{Specify the variable that will be used for expanding the data, usually this is a duration (of episode) variable. It needs to be a vector with only valid non-negative numbers and no NAs.}
+\item{duration}{Specify the integer variable to be used for expanding the data. You can provide this variable either as a quoted string or unquoted name. Typically, this is a duration (e.g., episode length) variable. It must be a numeric vector containing only non-negative integers, with no missing (NA) values.}
 }
 \value{
 A Dataframe.
 }
 \description{
-`expand()` duplicates rows by a variable specified in the duration argument. It is inspired by statas expand function.
+`expand()` duplicates rows by a integer variable specified in the duration argument, typically a months counter. It is inspired by statas expand function and often used in the context of episode data that must be transformed into monthly data.
 }
 \examples{
 df <- data.frame(id = 1:3, duration = c(2, 1, 3))

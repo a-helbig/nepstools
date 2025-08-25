@@ -24,12 +24,20 @@ A Dataframe.
 `replace_season_codes()` replaces NEPS specific season codes in date variables to standard month codes. For example code 27: "Summer" will be replaced with Code 7: "July".
 }
 \examples{
-df <- data.frame(
-  month_var = c(21, 22, 24, 25, 27),
-  other_var = c(1, 2, 3, 4, 5)
-)
-attr(df$month_var, "label") <- "Month of survey"
+# Example with NEPS SC6 semantic structures spGap file
+path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
 
-replace_season_codes(df)
+# create some artificial datapoints
+artificial_datapoints <- data.frame(
+ ID_t = c(1, 2, 3, 24, 5),
+ ts2912m = c(-97, 24, 5, 32, 30))
+
+# add these artificial datapoints to the empty neps dataset
+df_neps <- rbind(df_neps, artificial_datapoints)
+print(df_neps)
+
+df_neps_replaced <- replace_season_codes(df_neps)
+print(df_neps_replaced)
 
 }

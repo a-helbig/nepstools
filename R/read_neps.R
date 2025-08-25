@@ -56,7 +56,7 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
         # Get the labels from label_table
         new_labels <- label_table[[value_name]]
 
-        # Convert integer labels to double (haven::write_dta requires double)
+        # Convert integer labels to double
         if (is.integer(new_labels)) {
           new_labels <- as.double(new_labels)
           names(new_labels) <- names(label_table[[value_name]])

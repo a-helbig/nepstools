@@ -5,8 +5,8 @@
 #'
 #' `replace_values_with_na()` sets NEPS specific missing codes to NA. Default missing codes are c(seq(-99, -90), seq(-56, -51), seq(-29, -22)). If only specific variables should be taken into account, use the vars argument and supply a vector of variable names.
 #'
-#' @param data A dataset to apply the function to.
-#' @param vars Specify vars where missing values should be replaced with NA. If set to NULL, all variables will be used.
+#' @param data A dataframe to apply the function to.
+#' @param vars Specify variables where missing values should be replaced with NA. If set to NULL, all variables will be used.
 #' @param values_to_replace Specify values that should be replaced with NA. Default are all standard NEPS missing codes.
 #'
 #' @returns A dataframe.
@@ -133,9 +133,9 @@ replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24
 
 #' Expand data
 #'
-#' `expand()` duplicates rows by a variable specified in the duration argument. It is inspired by statas expand function.
-#' @param data A dataset that will be expanded.
-#' @param duration Specify the variable that will be used for expanding the data, usually this is a duration (of episode) variable. It needs to be a vector with only valid non-negative numbers and no NAs.
+#' `expand()` duplicates rows by a integer variable specified in the duration argument, typically a months counter. It is inspired by statas expand function and often used in the context of episode data that must be transformed into monthly data.
+#' @param data A dataframe.
+#' @param duration Specify the integer variable to be used for expanding the data. You can provide this variable either as a quoted string or unquoted name. Typically, this is a duration (e.g., episode length) variable. It must be a numeric vector containing only non-negative integers, with no missing (NA) values.
 #'
 #' @returns A Dataframe.
 #'
@@ -148,24 +148,38 @@ expand <- function(data, duration){
   # Check if data is a data.frame
   if(!is.data.frame(data)) stop("The data argument must be a data.frame.")
 
-  # Capture duration as name
-  duration <- substitute(duration)
+  # Capture duration argument expression
+  duration_expr <- substitute(duration)
 
-  # Check if duration is a symbol (i.e., variable name)
-  if (!is.symbol(duration)) stop("The duration argument must be an unquoted variable name.")
-
-  duration_name <- as.character(duration)
+  # Determine duration column name
+  if (is.symbol(duration_expr)) {
+    # unquoted name, e.g. dur
+    duration_name <- as.character(duration_expr)
+  } else if (is.character(duration_expr)) {
+    # quoted name, e.g. "dur"
+    duration_name <- duration_expr
+  } else {
+    stop("The duration argument must be an unquoted or quoted variable name (string).")
+  }
 
   # Check if duration variable exists in data
-  if (!(duration_name %in% names(data))) stop(paste0("The variable '" ,duration_name,  "', specified in the duration argument, is not in data."))
+  if (!(duration_name %in% names(data))) stop(
+    paste0("The variable '", duration_name, "' specified in the duration argument is not in data."))
 
-  # Check if data[[duration]] is numeric and non-negative, no NA
+  # Check if data[[duration_name]] is numeric and non-negative, no NA
   if (!is.numeric(data[[duration_name]])) stop("The duration variable must be numeric.")
-  if(any(data[[duration_name]] < 0) | any(is.na(data[[duration_name]]))) stop("Please ensure the duration argument is a valid non-negative number and not NA.")
+  if(any(data[[duration_name]] < 0) | any(is.na(data[[duration_name]]))) stop(
+    "Please ensure the duration argument is a valid non-negative number and not NA.")
+
+  # check if duration variable is an integer (after NA check!)
+  if (any(data[[duration_name]] %% 1 != 0)) {
+    stop("The duration variable must contain integer values.")
+  }
 
   # Expand data by the duration variable
-  data[rep(seq_len(nrow(data)), data[[duration_name]]), 1:ncol(data)]
+  data[rep(seq_len(nrow(data)), data[[duration_name]]), , drop = FALSE]
 }
+
 
 
 #' Print questiontext
@@ -173,7 +187,7 @@ expand <- function(data, duration){
 #' `question()` is a convenient wrapper for the attr() function. It prints the attached questiontext from specified variable in the variable argument to the console.
 #'
 #' @param data Specify the dataset that was generated with read_neps function
-#' @param variable Specify the variable for which the question text should be printed.
+#' @param variable Specify the variable for which the question text should be printed. Argument can be a string or an unquoted variable name.
 #'
 #' @returns A String.
 #' @export
@@ -191,17 +205,31 @@ question <- function(data, variable) {
     stop("The data argument must be a data frame.")
   }
 
+  # Capture the variable argument expression
+  var_expr <- substitute(variable)
+
+  # Determine the variable name as a character string
+  if (is.symbol(var_expr)) {
+    # unquoted variable name
+    variable_name <- as.character(var_expr)
+  } else if (is.character(var_expr)) {
+    # quoted variable name
+    variable_name <- var_expr
+  } else {
+    stop("The variable argument must be an unquoted or quoted variable name (string).")
+  }
+
   # Check if variable exists in data
-  if (!variable %in% names(data)) {
-    stop("Variable '", variable, "' not found in the data frame.")
+  if (!variable_name %in% names(data)) {
+    stop("Variable '", variable_name, "' not found in the data frame.")
   }
 
   # Extract attribute "question" (non-exact match)
-  q_attr <- attr(data[[variable]], "NEPS_questiontext_", exact = FALSE)
+  q_attr <- attr(data[[variable_name]], "NEPS_questiontext_", exact = FALSE)
 
   # Check if attribute exists and is non-empty
   if (is.null(q_attr) || length(q_attr) == 0) {
-    warning("Variable '", variable, "' does not have a questiontext attached")
+    warning("Variable '", variable_name, "' does not have a questiontext attached")
     return(invisible(NULL))
   }
 

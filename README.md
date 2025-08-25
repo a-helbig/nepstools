@@ -19,10 +19,12 @@ developed by the FDZ of the Lifbi in Bamberg, Germany.
 
 ## Installation
 
-You can install the development version of *nepstools* like so:
+You can install the development version of *nepstools* with remotes
+package like so:
 
 ``` r
-remotes::install_github("nepstools", username = "a-helbig")
+# install.packages("remotes") - uncomment this row in case you havent installed package "remotes" yet
+remotes::install_github("a-helbig/nepstools")
 ```
 
 ## Example
@@ -65,6 +67,6 @@ facilitate working with NEPS data:
 2.  `replace_season_codes()`: recoding season codes to corresponding
     months
 3.  `expand()`: expanding episode data by duration
-4.  `question()`: convenient wrapper for question texts
+4.  `question()`: convenient wrapper for printing question texts
 
 For more details, please checkout the *nepstools* vignette.
