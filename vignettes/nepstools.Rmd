@@ -167,10 +167,10 @@ print(df_neps)
 expanded_df <- nepstools::expand(df_neps, duration)
 print(expanded_df)
 
-# create month indicator
+# create month indicator - May use a package like lubridate to get a nicer formating for date variables.
 expanded_df <- expanded_df |> 
   dplyr::group_by(ID_t) |> 
-  dplyr::mutate(month = dplyr::row_number())
+  dplyr::mutate(month = dplyr::first(start) + dplyr::row_number() - 1)
 print(expanded_df)
 ```
 
