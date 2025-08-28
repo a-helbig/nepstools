@@ -24,6 +24,7 @@ This vignette introduces key functionalities for:
 - Recoding season codes to corresponding calendar months with `replace_season_codes()`
 - Expanding episode data by episode duration with `expand()`
 - Extracting variable question texts with `question()`
+- Search for keywords in the attributes of the variables with `lookfor_meta()`
 
 
 ## 1. Reading NEPS data 
@@ -174,7 +175,7 @@ print(expanded_df)
 ```
 
 ## 5. Extracting question texts
-NEPS variables come with attached metadata, including question texts in German or English. Use the convenient wrapper `question()` to print the question text for a specified variable.
+NEPS variables come with attached metadata, including question texts in German or English. Use the convenient wrapper `question()` to print the question text for a specified variable. The language will depend on the argument english (TRUE or FALSE) in the `read_neps()` function.
 
 ```{r question}
 # read data with variables: "ID" and "enddate of episode"
@@ -184,4 +185,17 @@ question(df_neps, "ts2912m")
 ```
 
 
+## 6. Search for keywords in attributes of dataframe columns (meta info)
+The function `lookfor_meta()` searches in all attached attributes of each variable in a dataframe loaded with `read_neps()` for specified keywords. It is case insensitive by default.
+
+```{r lookfor_meta}
+# read data with variables: "ID" and "enddate of episode"
+df_neps <- read_neps(path, english = TRUE)
+
+# Search for keyword "type" to identify all variables dealing with the type of the gap episode in one way or another
+lookfor_meta(df_neps, "type")
+
+# Search for keyword "retirement" to identify all variables dealing with the type of the gap episode in one way or another
+lookfor_meta(df_neps, "retirement")
+```
 

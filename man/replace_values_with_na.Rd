@@ -26,7 +26,7 @@ A dataframe.
 \examples{
 # Example with NEPS SC6 semantic structures spGap file
 path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
-df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+df_neps <- read_neps(path, english = TRUE, col_select = c("ID_t", "ts2912m"))
 
 # create some artificial datapoints
 artificial_datapoints <- data.frame(

@@ -274,8 +274,6 @@ test_that("error if variable argument is neither quoted nor unquoted", {
   expect_error(question(df, list(a=1)), "The variable argument must be an unquoted or quoted variable name")
 })
 
-# --- Your existing functional tests ---
-
 test_that("prints questiontext", {
   df <- data.frame(id = 1, dur = 1)
   attr(df$id, "NEPS_questiontext_de") <- "example question?"
@@ -313,5 +311,73 @@ test_that("warns and returns NULL if attribute is empty", {
   attr(df$a, "NEPS_questiontext_") <- character(0)
   expect_warning(res <- question(df, "a"), "does not have a questiontext attached")
   expect_null(res)
+})
+
+
+################################################################################
+# lookfor_meta
+################################################################################
+
+test_that("finds matches in column attributes", {
+  df <- data.frame(b = letters[1:3])
+  attr(df$b, "label") <- "character variable"
+
+  res <- lookfor_meta(df, "character")
+
+  expect_true(any(grepl("Variable b: @label", names(res))))
+  expect_match(res[[grep("Variable b: @label", names(res))]], "character")
+})
+
+test_that("does NOT find matches in data frame attributes", {
+  df <- data.frame(a = 1:3)
+  attr(df, "description") <- "This is a test dataframe with description"
+
+  # Searching for keyword in data frame attributes should NOT find anything
+  res <- lookfor_meta(df, "description")
+  expect_null(res)
+})
+
+test_that("is case insensitive by default", {
+  df <- data.frame(c = 1:3)
+  attr(df$c, "note") <- "CaSe InSeNsItIvE text"
+
+  res_lower <- lookfor_meta(df, "caseinsensitive")
+  res_upper <- lookfor_meta(df, "CASEINSENSITIVE")
+  expect_equal(res_lower, res_upper)
+})
+
+test_that("respects ignore.case = FALSE", {
+  df <- data.frame(x = 1:3)
+  attr(df$x, "comment") <- "MixedCaseText"
+
+  res1 <- lookfor_meta(df, "mixedcase", ignore.case = TRUE)
+  res2 <- lookfor_meta(df, "mixedcase", ignore.case = FALSE)
+
+  expect_true(length(res1) == 1)
+  expect_null(res2) # no match because case differs
+})
+
+test_that("returns NULL and message if no matches found", {
+  df <- data.frame(e = 1:3)
+
+  expect_message(res <- lookfor_meta(df, "nomatch"), "No attributes matching search words found.")
+  expect_null(res)
+})
+
+test_that("errors on invalid inputs", {
+  expect_error(lookfor_meta(letters, "a"), "is.data.frame")
+  expect_error(lookfor_meta(data.frame(x=1), character(0)))
+  expect_error(lookfor_meta(data.frame(x=1), "a", ignore.case = "no"), "is.logical")
+})
+
+test_that("multiple search words works", {
+  df <- data.frame(y = 1:3)
+  attr(df$y, "label") <- "Numeric variable"
+  attr(df$y, "note") <- "Important note"
+
+  res <- lookfor_meta(df, c("numeric", "note"))
+
+  expect_true(any(grepl("Variable y: @label", names(res))))
+  expect_true(any(grepl("Variable y: @note", names(res))))
 })
 

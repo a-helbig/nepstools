@@ -51,6 +51,21 @@ path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
 
 # read data with english labels and meta
 df_neps <- read_neps(path, english = TRUE)
+
+# print head of data
+head(df_neps)
+#> # A tibble: 1 × 36
+#>    ID_t wave      nepswave  splink spell subspell spgen    spext spstat disagint
+#>   <dbl> <dbl+lbl> <dbl+lbl>  <dbl> <dbl>    <dbl> <dbl+lb> <dbl> <dbl+> <dbl+lb>
+#> 1    NA NA        NA            NA    NA       NA NA       NA    NA     NA      
+#> # ℹ 26 more variables: disagwave <dbl+lbl>, ts29101_v1 <dbl+lbl>,
+#> #   ts29901 <dbl+lbl>, ts29300 <dbl+lbl>, ts29101 <dbl+lbl>, ts29102_O <chr>,
+#> #   ts2911m <dbl+lbl>, ts2911y <dbl+lbl>, ts29103 <dbl+lbl>, ts2912m <dbl+lbl>,
+#> #   ts2912y <dbl+lbl>, ts2912c <dbl+lbl>, ts2911m_g1 <dbl+lbl>,
+#> #   ts2911y_g1 <dbl+lbl>, ts2912m_g1 <dbl+lbl>, ts2912y_g1 <dbl+lbl>,
+#> #   ts2912c_g1 <dbl+lbl>, spms <dbl+lbl>, ts29201 <dbl+lbl>, ts27108 <dbl+lbl>,
+#> #   ts27100 <dbl+lbl>, ts2731m <dbl+lbl>, ts2731y <dbl+lbl>, …
+
 # Example Variable: ts2912m - enddate (month) of gap episode
 # Print english variable label 
 attr(df_neps$ts2912m, "label")

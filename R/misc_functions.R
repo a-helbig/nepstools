@@ -14,7 +14,7 @@
 #' @examples
 #' # Example with NEPS SC6 semantic structures spGap file
 #' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
-#' df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+#' df_neps <- read_neps(path, english = TRUE, col_select = c("ID_t", "ts2912m"))
 #'
 #' # create some artificial datapoints
 #' artificial_datapoints <- data.frame(
@@ -82,7 +82,7 @@ replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(
 #' @examples
 #' # Example with NEPS SC6 semantic structures spGap file
 #' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
-#' df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+#' df_neps <- read_neps(path, english = TRUE, col_select = c("ID_t", "ts2912m"))
 #'
 #' # create some artificial datapoints
 #' artificial_datapoints <- data.frame(
@@ -195,7 +195,7 @@ expand <- function(data, duration){
 #' @examples
 #' # Example with NEPS SC6 semantic structures spGap file
 #' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
-#' df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+#' df_neps <- read_neps(path, english = TRUE, col_select = c("ID_t", "ts2912m"))
 #'
 #' question(df_neps, "ts2912m")
 #'
@@ -236,3 +236,73 @@ question <- function(data, variable) {
   return(q_attr)
 }
 
+
+#' Search for keywords in attributes of variables
+#'
+#' This function searches through the attributes of each column (variable) in a data frame
+#' for specified keyword(s) and returns a named list of all attribute values
+#' that contain any of the search words.
+#' Data frame-level attributes are **not searched**.
+#' The search is case-insensitive by default.
+#'
+#' @param df A data frame whose columns' attributes will be searched.
+#' @param search_words A character vector of one or more keywords to search for within attributes.
+#' @param ignore.case Logical; if \code{TRUE} (default), the search is case-insensitive.
+#'
+#' @return
+#' A named list of matched attribute values.
+#' The names describe where each match was found as:
+#' \code{"Variable <column_name>: @<attribute_name>"}
+#' If no matches are found, the function prints a message and returns \code{NULL}.
+#'
+#' @export
+#'
+#' @examples
+#' # Example with NEPS SC6 semantic structures spGap file
+#' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+#' df_neps <- read_neps(path, english = TRUE)
+#'
+#' # Search for keyword "type" to identify all variables dealing with the type of the gap in some way
+#' lookfor_meta(df_neps, "type")
+lookfor_meta <- function(df, search_words, ignore.case = TRUE) {
+  # Check input types
+  stopifnot(is.data.frame(df))
+  stopifnot(length(search_words) >= 1)
+  stopifnot(is.logical(ignore.case), length(ignore.case) == 1)
+
+  # Helper to check if any search word matches attribute's printed value
+  attr_matches <- function(attr_value, words) {
+    if (is.null(attr_value)) return(FALSE)
+    # Convert the attribute value to a single character string (capture.output(print()) handles complex attribute types by capturing their printed output)
+    attr_char <- paste(utils::capture.output(print(attr_value)), collapse = " ")
+    # For each search word, check if it appears (grepl) in the attribute character string
+    any(sapply(words, function(w) grepl(w, attr_char, ignore.case = ignore.case)))
+  }
+
+  results <- list()
+
+  # Search attributes of columns (variables)
+  for (col_name in names(df)) {
+    # Get all attributes of the current column vector
+    col_attrs <- attributes(df[[col_name]])
+    if (length(col_attrs) == 0) next
+
+    # Loop over each attribute of the current column
+    for (attr_name in names(col_attrs)) {
+      # Check if this column attribute contains any of the search words by using the above helper
+      if (attr_matches(col_attrs[[attr_name]], search_words)) {
+        # If match found, add the match to the results list; label it with column name and attribute name clearly
+        results[[paste0("Variable ", col_name, ": @", attr_name)]] <- col_attrs[[attr_name]]
+      }
+    }
+  }
+
+  # If no matching attributes found, print message and return NULL
+  if (length(results) == 0) {
+    message("No attributes matching search words found.")
+    return(NULL)
+  }
+
+  # return list
+  return(results)
+}
