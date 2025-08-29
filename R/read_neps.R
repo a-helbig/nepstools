@@ -34,6 +34,11 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
   # read expansionsfields with meta infos in neps data
   meta_data <- read_exp_fields(datasetpath)
 
+  # handle missing meta info cleanly
+  if(is.null(meta_data)){
+    stop("Cannot find expected NEPS meta data in the dataset. Please provide a valid NEPS SUF .dta dataset.")
+  }
+
   # English labels ----------------------------------------------------------
 
   if(english){
@@ -143,7 +148,8 @@ read_exp_fields <- function(datapath, cols=NULL, attr_type=NULL, only_value=F) {
   exp_fields <- attr(data, "expansion.fields")
   # check if there were expansion.fields, if not throw an informative error message
   if(is.null(exp_fields) | length(exp_fields)==0){
-    stop("Cant find attracted meta data in selected dataset. Please ensure you select only NEPS-SUF datasets here.")
+    # return NULL to main function in case expansion fields attributes are missing (indicating a non-neps-dataset)
+    return(NULL)
   }
   # Extract variable, type, and value from the expansion fields and unite these vectors into a df
   fields_df <- data.frame(

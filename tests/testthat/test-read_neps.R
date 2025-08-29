@@ -7,7 +7,7 @@ test_that("is the generated object of type dataframe?", {
 })
 
 test_that("will the function error when a non-neps dataset is being loaded", {
-  expect_error(read_neps(dp_non_neps_example))
+  expect_error(read_neps(dp_non_neps_example), regexp = "Cannot find expected NEPS meta data in the dataset. Please provide a valid NEPS SUF .dta dataset.")
 })
 
 test_that("does the col select argument work?", {
