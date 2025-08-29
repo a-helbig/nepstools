@@ -1,5 +1,5 @@
 ---
-title: "Introduction to nepstools"
+title: "nepstools"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{nepstools}
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-
+## Introduction
 The nepstools package provides convenient functions to work with NEPS Scientific Use Files (SUFs). It is inspired by the stata ado nepstools developed by the Forschungsdatenzentrum at LifBi in Bamberg. 
 
 This vignette introduces key functionalities for:
