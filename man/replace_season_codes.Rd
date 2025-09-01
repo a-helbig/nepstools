@@ -13,7 +13,7 @@ replace_season_codes(
 \arguments{
 \item{data}{A dataset to apply the function to.}
 
-\item{vars}{Specify vars where season codes should be replaced with months. Optional, if set to NULL, all vars are being taken into account, which can lead to problems in case of non-date variables.}
+\item{vars}{Specify vars where season codes should be replaced with months. Optional, if set to NULL, all vars are being taken into account. The function than only select variables that have the label "month" or "monat". It is recommended to specify the variables to which the function should be applied.}
 
 \item{values_to_replace}{These are the season codes. Usually doesnt need to be modified.}
 }

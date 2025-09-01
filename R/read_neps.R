@@ -39,6 +39,8 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
     stop("Cannot find expected NEPS meta data in the dataset. Please provide a valid NEPS SUF .dta dataset.")
   }
 
+  # now that meta data is available, we add it to the data dependent on the function arguments
+
   # English labels ----------------------------------------------------------
 
   if(english){
@@ -48,14 +50,14 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
     # load names of value labels
     names_of_val_labels <- meta_data |> dplyr::filter(type == "_lang_l_en")
 
-    # extract attracted val labels from 'label.table' as a named integer list along with names of val labels. suppress warnings here because some labels are missing and factor codes are being detected
-    suppressWarnings(label_table <- attr(readstata13::read.dta13(datasetpath, select.rows = 1), 'label.table'))
+    # extract attracted value labels from attribute 'label.table' as a named integer list. Suppress warnings here because some labels are missing and factor codes are being detected
+    suppressWarnings(label_table <- attr(readstata13::read.dta13(datasetpath, select.cols = "ID_t", select.rows = 1), 'label.table'))
 
     # Loop through each variable in exp_fields
     for (i in 1:nrow(names_of_val_labels)) {
       variable_name <- names_of_val_labels$variable[i]
       value_name <- names_of_val_labels$value[i]
-      #
+
       # Check if the value exists in label_table
       if (value_name %in% names(label_table)) {
         # Get the labels from label_table
@@ -79,7 +81,7 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
     # pull english var labels from meta_data
     en_labels <- meta_data |> dplyr::filter(type == "NEPS_varlabel_en") |> dplyr::select(-type)
 
-    # Iterate through each variable in the data
+    # Loop through each variable in the data
     for (var in names(data)) {
       # Find the corresponding label of each variable in data in en_labels df
       label <- en_labels |> dplyr::filter(variable == var) |> dplyr::pull(value)
@@ -95,11 +97,13 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
     meta <- meta[!stringr::str_detect(meta, "_de$")]
   }
 
-  # if german is selected
+  # German labels -----------------------------------------------------------
+
+  # if german is selected, we only need to get rid of the english meta infos since German labels are already attached to the dataframe
   else {
     # generate vector with all meta data types
     meta <- unique(meta_data$type)
-    # get rid of the german meta types
+    # get rid of the english meta types
     meta <- meta[!stringr::str_detect(meta, "_en$")]
   }
 
@@ -109,6 +113,8 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
   if(compact_meta){
     meta <- meta[stringr::str_detect(meta, "(questiontext|interviewerinstruction|harmonization|alias)")]
   }
+
+  # filter meta_data with meta: this essentially gets rid of German or English meta infos depending on the english argument
   meta_data <- meta_data |>
     dplyr::filter(type %in% meta)
 
@@ -121,11 +127,10 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
 
     # Check if the variable in the meta df exists in dataframe data
     if (variable_name %in% names(data)) {
-      # attract meta data to variables
+      # attract meta data to variables in data
       attr(data[[variable_name]], which = type_name) <- value_name
     }
   }
-
 
   # original instrument names -----------------------------------------------
   # if charren is TRUE, switch variable names to original instrument names
@@ -135,14 +140,14 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
   return(data)
 }
 
+
+
 #' A helper to extract meta info from data
 #'
 #' @keywords internal
-read_exp_fields <- function(datapath, cols=NULL, attr_type=NULL, only_value=F) {
-  # prevents devtools::check() from complaining about Non-standard evaluation use in dplyr functions
-  variable <- type <- value <- NULL
+read_exp_fields <- function(datapath) {
 
-  # Read the data with only the "ID_t" column and the first row for performance. We use the slower read.dta13 function here because it reads all attracted meta data while havens read_dta func does not
+  # Read the data with only the "ID_t" column and the first row for performance. We use the slower read.dta13 function here because it reads all attracted meta data while the faster  read_dta func from package haven does not
   data <- readstata13::read.dta13(datapath, select.cols = "ID_t", select.rows = 1)
   # Extract the expansion fields attribute
   exp_fields <- attr(data, "expansion.fields")
@@ -158,22 +163,6 @@ read_exp_fields <- function(datapath, cols=NULL, attr_type=NULL, only_value=F) {
     value = sapply(exp_fields, `[[`, 3),
     stringsAsFactors = FALSE
   )
-  # access the required information from the "value" column for the selected variable and selected type of information
-  if (!is.null(attr_type) & !is.null(cols)) {
-    fields_df <- fields_df |>
-      dplyr::filter(variable %in% cols & type == attr_type)
-  }
-  if (is.null(attr_type) & !is.null(cols)) {
-    fields_df <- fields_df |>
-      dplyr::filter(variable %in% cols)
-  }
-  if (!is.null(attr_type) & is.null(cols)) {
-    fields_df <- fields_df |>
-      dplyr::filter(type == attr_type)
-  }
-  if(only_value)
-    fields_df <- fields_df |>
-    dplyr::pull(value)
 
   return(fields_df)
 }

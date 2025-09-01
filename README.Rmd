@@ -58,7 +58,7 @@ In addition the package provides a handful of smaller functions that facilitate 
   1. `replace_values_with_na()`: replacing NEPS missing values with NA
   2. `replace_season_codes()`: recoding season codes to corresponding months
   3. `expand()`: expanding episode data by duration
-  4. `question()`: convenient wrapper for printing question texts
+  4. `question()`: wrapper of attr function for printing question texts
   5. `lookfor_meta()`: searching for keywords in attributes of dataframe columns (meta info)
 
 For more details, please checkout the *nepstools* vignette.

@@ -4,7 +4,7 @@
 \alias{read_exp_fields}
 \title{A helper to extract meta info from data}
 \usage{
-read_exp_fields(datapath, cols = NULL, attr_type = NULL, only_value = F)
+read_exp_fields(datapath)
 }
 \description{
 A helper to extract meta info from data

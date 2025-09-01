@@ -41,7 +41,7 @@ test_that("error if col_select contains variables not present in data", {
 test_that("meta attributes are attached to variables", {
   data <- read_neps(dp_semantic_neps_gap, compact_meta = TRUE)
 
-  # Pick a variable known to have attributes, e.g., "ID_t" and extract alias meta
+  # extract alias from var ID_t
   alias <- attr(data$ID_t, "NEPS_alias")
 
   # check if the alias equals ID_t
@@ -65,7 +65,7 @@ test_that("meta types filtered correctly based on language", {
 test_that("switch_var_names replaces variable names with NEPS_alias attribute", {
   df <- data.frame(a = 1, b = 2)
   attr(df$a, "NEPS_alias") <- "var_a"
-  attr(df$b, "NEPS_alias") <- ""
+  attr(df$b, "NEPS_alias") <- "" # empty string: should not be switched by switch_var_names
   # Use helper function on df
   df_renamed <- switch_var_names(df)
 

@@ -74,7 +74,7 @@ replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(
 #' `replace_season_codes()` replaces NEPS specific season codes in date variables to standard month codes. For example code 27: "Summer" will be replaced with Code 7: "July".
 #'
 #' @param data A dataset to apply the function to.
-#' @param vars Specify vars where season codes should be replaced with months. Optional, if set to NULL, all vars are being taken into account, which can lead to problems in case of non-date variables.
+#' @param vars Specify vars where season codes should be replaced with months. Optional, if set to NULL, all vars are being taken into account. The function than only select variables that have the label "month" or "monat". It is recommended to specify the variables to which the function should be applied.
 #' @param values_to_replace These are the season codes. Usually doesnt need to be modified.
 #'
 #' @returns A Dataframe.
@@ -110,11 +110,22 @@ replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24
   if (is.data.frame(data)) {
     # Select variables based on label if vars not provided
     if (is.null(vars)) {
-      vars <- names(data)[sapply(data, has_month_label)]
+      vars <- names(data)[sapply(data, has_month_label)] # find variables with label "month" or "monat"
     } else {
       # Validate provided variables exist in the dataframe
       if (!all(vars %in% names(data))) {
         stop("Some variables specified in 'vars' are not present in the data frame.")
+      }
+
+      # Check if specified variables have labels containing "month" or "monat"
+      vars_without_month_label <- vars[!sapply(data[vars], has_month_label)]
+      if (length(vars_without_month_label) > 0) {
+        warning(
+          sprintf(
+            "The following specified variables do not have labels containing 'month' or 'monat': %s",
+            paste(vars_without_month_label, collapse = ", ")
+          )
+        )
       }
     }
 
@@ -135,13 +146,39 @@ replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24
 #'
 #' `expand()` duplicates rows by a integer variable specified in the duration argument, typically a months counter. It is inspired by statas expand function and often used in the context of episode data that must be transformed into monthly data.
 #' @param data A dataframe.
-#' @param duration Specify the integer variable to be used for expanding the data. You can provide this variable either as a quoted string or unquoted name. Typically, this is a duration (e.g., episode length) variable. It must be a numeric vector containing only non-negative integers, with no missing (NA) values.
+#' @param duration Specify the integer variable to be used for expanding the data. You can provide this variable either as a quoted string or unquoted variable name. Typically, this is a duration (e.g., episode length) variable. It must be a numeric vector containing only non-negative integers, with no missing (NA) values. Note: If there are zeros in the duration variable, the function will delete these rows. So make sure, that any generated duration variables are > 1 without NAs.
 #'
 #' @returns A Dataframe.
 #'
 #' @examples
-#' df <- data.frame(id = 1:3, duration = c(2, 1, 3))
-#' expand(df, duration)
+#'
+#' path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+#' df_neps_ex <- read_neps(path, col_select = c("ID_t", "ts2911m", "ts2911y", "ts2912m", "ts2912y"))
+#' df_neps_ex <- df_neps_ex[-1,] # get rid of NA row that is in every semantic structure file from NEPS
+#'
+#' # create some artificial datapoints
+#' artificial_datapoints <- data.frame(
+#'   ID_t = c(1, 2, 3, 4, 5),
+#'  ts2911m = c(2, 12, 11, 4, 12),
+#'   ts2911y = c(2008, 2006, 2005, 2009, 2010),
+#'   ts2912m = c(4, 1, 2, 5, 2),
+#'   ts2912y = c(2008, 2007, 2006, 2009, 2011)
+#' )
+#'
+#' # add these artificial datapoints to the empty neps dataset
+#' df_neps_ex <- rbind(df_neps_ex, artificial_datapoints)
+#'
+#' # generate date and duration variables
+#' df_neps_ex <- df_neps_ex |>
+#'   dplyr::mutate(start = ((ts2911y-1960)*12)+ts2911m - 1, # months since january 1960
+#'   end = ((ts2912y-1960)*12)+ts2912m - 1, # months since january 1960
+#'   duration = (end - start) + 1) # + 1 required so we dont get episode durations of 0 months
+#'
+#' print(df_neps_ex)
+#'
+#' # expand the dataframe
+#' expanded_df <- nepstools::expand(df_neps_ex, duration)
+#' print(expanded_df)
 #'
 #' @export
 expand <- function(data, duration){
@@ -170,6 +207,11 @@ expand <- function(data, duration){
   if (!is.numeric(data[[duration_name]])) stop("The duration variable must be numeric.")
   if(any(data[[duration_name]] < 0) | any(is.na(data[[duration_name]]))) stop(
     "Please ensure the duration argument is a valid non-negative number and not NA.")
+
+  # Warn if zeros are present in the duration variable
+  if(any(data[[duration_name]] == 0)) {
+    warning("Zero values found in the duration variable. Corresponding rows will be dropped during expansion.")
+  }
 
   # check if duration variable is an integer (after NA check!)
   if (any(data[[duration_name]] %% 1 != 0)) {
@@ -266,9 +308,15 @@ question <- function(data, variable) {
 #' lookfor_meta(df_neps, "type")
 lookfor_meta <- function(df, search_words, ignore.case = TRUE) {
   # Check input types
-  stopifnot(is.data.frame(df))
-  stopifnot(length(search_words) >= 1)
-  stopifnot(is.logical(ignore.case), length(ignore.case) == 1)
+  if (!is.data.frame(df)) {
+    stop("Argument 'df' must be a data.frame.")
+  }
+  if (!(is.character(search_words) && length(search_words) >= 1)) {
+    stop("Argument 'search_words' must be a character vector of length >= 1.")
+  }
+  if (!(is.logical(ignore.case) && length(ignore.case) == 1)) {
+    stop("Argument 'ignore.case' must be a single logical value (TRUE or FALSE).")
+  }
 
   # Helper to check if any search word matches attribute's printed value
   attr_matches <- function(attr_value, words) {
@@ -291,7 +339,7 @@ lookfor_meta <- function(df, search_words, ignore.case = TRUE) {
     for (attr_name in names(col_attrs)) {
       # Check if this column attribute contains any of the search words by using the above helper
       if (attr_matches(col_attrs[[attr_name]], search_words)) {
-        # If match found, add the match to the results list; label it with column name and attribute name clearly
+        # If match found, add the match to the results list. Label it with column name and attribute name
         results[[paste0("Variable ", col_name, ": @", attr_name)]] <- col_attrs[[attr_name]]
       }
     }

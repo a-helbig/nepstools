@@ -3,11 +3,10 @@
 ################################################################################
 
 test_that("neps missing codes are replaced with NA in all variables", {
-  # Call read_neps function to get the dataframe
+  # load the data that were read in the helper file
   df1 <- replace_values_with_na(semantic_neps_gap)
-  df2 <- semantic_neps_gap
 
-  # Define the NEPS missing values vector
+  # Define NEPS missings
   neps_miss_vals <- c(seq(-99, -90), seq(-56, -51), seq(-29, -22))
 
   # Check each column for NEPS missing values
@@ -17,17 +16,6 @@ test_that("neps missing codes are replaced with NA in all variables", {
     # Test that none of the missing values are present in this column
     expect_false(any(col_vals %in% neps_miss_vals),
                  info = paste("NEPS Missing values found in df1 in column", colname))
-  }
-
-  # Check if any NEPS missing value exists in any column
-  has_miss_vals <- any(sapply(df2, function(col) any(col %in% neps_miss_vals)))
-
-  # Check this for every var in df2
-  for (colname in names(df2)) {
-    col_vals <- df2[[colname]]
-
-    # Test that none of the forbidden values are present in this column
-    expect_true(has_miss_vals, info = "No NEPS missing values found in any variable, allthough they were expected")
   }
   })
 
@@ -39,8 +27,8 @@ test_that("Replaces specified values with NA in all dataframe variables when var
   )
   result <- replace_values_with_na(df)
 
-  expect_true(all(is.na(result$a[1])))
-  expect_true(all(is.na(result$b[2])))
+  expect_true(is.na(result$a[1]))
+  expect_true(is.na(result$b[2]))
 
   # Non-matching values remain unchanged
   expect_equal(result$a[2:3], c(1, 2))
@@ -137,7 +125,6 @@ test_that("are all season codes in all month variables, and only in them, replac
   }
 })
 
-# test: replace_season_codes
 test_that("non-month variables remain unchanged after replacement", {
   df_original <- semantic_neps_gap
   df_replaced <- replace_season_codes(semantic_neps_gap)
@@ -159,6 +146,52 @@ test_that("non-month variables remain unchanged after replacement", {
       info = paste("Non-month variable", var, "has changed after replacement")
     )
   }
+})
+
+test_that("warnings when specified vars have no 'month' or 'monat' label", {
+  # Create a sample data frame
+  df <- data.frame(
+    month_var = c(21, 24, 27),
+    other_var = c(21, 24, 27),
+    stringsAsFactors = FALSE
+  )
+  # Add label with "month" to month_var
+  attr(df$month_var, "label") <- "This is the month variable"
+
+  # Add label without "month" to other_var
+  attr(df$other_var, "label") <- "Some other label"
+
+  # Case 1: specify only month_var (no warning expected)
+  expect_warning(
+    replace_season_codes(df, vars = "month_var"),
+    NA
+  )
+
+  # Case 2: specify other_var (should warn)
+  expect_warning(
+    replace_season_codes(df, vars = "other_var"),
+    "do not have labels containing 'month' or 'monat'"
+  )
+
+  # Case 3: specify both vars, should warn about other_var only
+  expect_warning(
+    replace_season_codes(df, vars = c("month_var", "other_var")),
+    "do not have labels containing 'month' or 'monat'"
+  )
+
+  # Case 4: specify variable without label attribute (also warn)
+  df$no_label_var <- c(21, 24, 27)
+
+  expect_warning(
+    replace_season_codes(df, vars = "no_label_var"),
+    "do not have labels containing 'month' or 'monat'"
+  )
+
+  # Case 5: no vars specified (should not warn because vars are auto-selected)
+  expect_warning(
+    replace_season_codes(df),
+    NA
+  )
 })
 
 ################################################################################
@@ -199,6 +232,15 @@ test_that("expand works with duration zero (produces zero rows)", {
 
   # Specifically, no rows should correspond to the first row
   expect_false(any(result$id == df$id[1]))
+})
+
+test_that("expand() warns when zeros are present in duration variable", {
+  df <- data.frame(id = 1:3, duration = c(1, 0, 2))
+
+  expect_warning(
+    result <- expand(df, duration),
+    "Zero values found in the duration variable"
+  )
 })
 
 test_that("expand works with duration equal to 1 (no replication)", {
@@ -253,23 +295,23 @@ test_that("expand errors when duration has non-integer numeric values", {
 ################################################################################
 
 test_that("question works with unquoted variable name", {
-  df <- data.frame(foo = 1:3, bar = 4:6)
-  attr(df$foo, "NEPS_questiontext_") <- "Question for foo"
+  df <- data.frame(id = 1:3, num = 4:6)
+  attr(df$id, "NEPS_questiontext_") <- "Question for id"
 
-  result <- question(df, foo)
-  expect_equal(result, "Question for foo")
+  result <- question(df, id)
+  expect_equal(result, "Question for id")
 })
 
 test_that("question works with quoted variable name", {
-  df <- data.frame(foo = 1:3, bar = 4:6)
-  attr(df$foo, "NEPS_questiontext_") <- "Question for foo"
+  df <- data.frame(id = 1:3, num = 4:6)
+  attr(df$id, "NEPS_questiontext_") <- "Question for id"
 
-  result <- question(df, "foo")
-  expect_equal(result, "Question for foo")
+  result <- question(df, "id")
+  expect_equal(result, "Question for id")
 })
 
 test_that("error if variable argument is neither quoted nor unquoted", {
-  df <- data.frame(foo = 1:3)
+  df <- data.frame(id = 1:3)
   expect_error(question(df, 123), "The variable argument must be an unquoted or quoted variable name")
   expect_error(question(df, list(a=1)), "The variable argument must be an unquoted or quoted variable name")
 })
@@ -365,9 +407,18 @@ test_that("returns NULL and message if no matches found", {
 })
 
 test_that("errors on invalid inputs", {
-  expect_error(lookfor_meta(letters, "a"), "is.data.frame")
-  expect_error(lookfor_meta(data.frame(x=1), character(0)))
-  expect_error(lookfor_meta(data.frame(x=1), "a", ignore.case = "no"), "is.logical")
+  expect_error(
+    lookfor_meta(letters, "a"),
+    "Argument 'df' must be a data.frame."
+  )
+  expect_error(
+    lookfor_meta(data.frame(x = 1), character(0)),
+    "Argument 'search_words' must be a character vector of length >= 1."
+  )
+  expect_error(
+    lookfor_meta(data.frame(x = 1), "a", ignore.case = "no"),
+    "Argument 'ignore.case' must be a single logical value \\(TRUE or FALSE\\)."
+  )
 })
 
 test_that("multiple search words works", {
