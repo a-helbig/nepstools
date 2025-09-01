@@ -50,7 +50,7 @@
 
 
 <dt id="arg-duration">duration<a class="anchor" aria-label="anchor" href="#arg-duration"></a></dt>
-<dd><p>Specify the integer variable to be used for expanding the data. You can provide this variable either as a quoted string or unquoted name. Typically, this is a duration (e.g., episode length) variable. It must be a numeric vector containing only non-negative integers, with no missing (NA) values.</p></dd>
+<dd><p>Specify the integer variable to be used for expanding the data. You can provide this variable either as a quoted string or unquoted variable name. Typically, this is a duration (e.g., episode length) variable. It must be a numeric vector containing only non-negative integers, with no missing (NA) values. Note: If there are zeros in the duration variable, the function will delete these rows. So make sure, that any generated duration variables are &gt; 1 without NAs.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -60,15 +60,55 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, duration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">expand</span><span class="op">(</span><span class="va">df</span>, <span class="va">duration</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     id duration</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1        2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1.1  1        2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2    2        1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3    3        3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3.1  3        3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3.2  3        3</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"SC6_spGap_S_15-0-0.dta"</span>, package <span class="op">=</span> <span class="st">"nepstools"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">df_neps_ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2911m"</span>, <span class="st">"ts2911y"</span>, <span class="st">"ts2912m"</span>, <span class="st">"ts2912y"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">df_neps_ex</span> <span class="op">&lt;-</span> <span class="va">df_neps_ex</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span> <span class="co"># get rid of NA row that is in every semantic structure file from NEPS</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># create some artificial datapoints</span></span></span>
+<span class="r-in"><span><span class="va">artificial_datapoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  ID_t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span> ts2911m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">12</span>, <span class="fl">11</span>, <span class="fl">4</span>, <span class="fl">12</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  ts2911y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2008</span>, <span class="fl">2006</span>, <span class="fl">2005</span>, <span class="fl">2009</span>, <span class="fl">2010</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  ts2912m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  ts2912y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2008</span>, <span class="fl">2007</span>, <span class="fl">2006</span>, <span class="fl">2009</span>, <span class="fl">2011</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># add these artificial datapoints to the empty neps dataset</span></span></span>
+<span class="r-in"><span><span class="va">df_neps_ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">df_neps_ex</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># generate date and duration variables</span></span></span>
+<span class="r-in"><span><span class="va">df_neps_ex</span> <span class="op">&lt;-</span> <span class="va">df_neps_ex</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>start <span class="op">=</span> <span class="op">(</span><span class="op">(</span><span class="va">ts2911y</span><span class="op">-</span><span class="fl">1960</span><span class="op">)</span><span class="op">*</span><span class="fl">12</span><span class="op">)</span><span class="op">+</span><span class="va">ts2911m</span> <span class="op">-</span> <span class="fl">1</span>, <span class="co"># months since january 1960</span></span></span>
+<span class="r-in"><span>  end <span class="op">=</span> <span class="op">(</span><span class="op">(</span><span class="va">ts2912y</span><span class="op">-</span><span class="fl">1960</span><span class="op">)</span><span class="op">*</span><span class="fl">12</span><span class="op">)</span><span class="op">+</span><span class="va">ts2912m</span> <span class="op">-</span> <span class="fl">1</span>, <span class="co"># months since january 1960</span></span></span>
+<span class="r-in"><span>  duration <span class="op">=</span> <span class="op">(</span><span class="va">end</span> <span class="op">-</span> <span class="va">start</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># + 1 required so we dont get episode durations of 0 months</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_neps_ex</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ID_t ts2911m ts2911y ts2912m ts2912y start end duration</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    1       2    2008       4    2008   577 579        3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    2      12    2006       1    2007   563 564        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    3      11    2005       2    2006   550 553        4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    4       4    2009       5    2009   591 592        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    5      12    2010       2    2011   611 613        3</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># expand the dataframe</span></span></span>
+<span class="r-in"><span><span class="va">expanded_df</span> <span class="op">&lt;-</span> <span class="fu">nepstools</span><span class="fu">::</span><span class="fu">expand</span><span class="op">(</span><span class="va">df_neps_ex</span>, <span class="va">duration</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expanded_df</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     ID_t ts2911m ts2911y ts2912m ts2912y start end duration</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1       2    2008       4    2008   577 579        3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1.1    1       2    2008       4    2008   577 579        3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1.2    1       2    2008       4    2008   577 579        3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      2      12    2006       1    2007   563 564        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2.1    2      12    2006       1    2007   563 564        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      3      11    2005       2    2006   550 553        4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.1    3      11    2005       2    2006   550 553        4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.2    3      11    2005       2    2006   550 553        4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3.3    3      11    2005       2    2006   550 553        4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      4       4    2009       5    2009   591 592        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4.1    4       4    2009       5    2009   591 592        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      5      12    2010       2    2011   611 613        3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5.1    5      12    2010       2    2011   611 613        3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5.2    5      12    2010       2    2011   611 613        3</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
