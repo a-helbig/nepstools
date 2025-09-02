@@ -48,8 +48,7 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-
-      <h1>nepstools</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>nepstools</h1>
             
       
 
@@ -83,6 +82,12 @@ developed by the Forschungsdatenzentrum at LifBi in Bamberg.</p>
 <code><a href="../reference/lookfor_meta.html">lookfor_meta()</a></code>
 </li>
 </ul>
+<p>Note that there is a NEPS semantic data file included in this package
+that only contains meta information and one row of NA values (these
+files are publicly available on the neps-data website and are therefore
+allowed to be in this package). This vignette occasionally includes
+artificial data added to the file to illustrate the package’s
+features.</p>
 </div>
 <div class="section level2">
 <h2 id="reading-neps-data">1. Reading NEPS data<a class="anchor" aria-label="anchor" href="#reading-neps-data"></a>
@@ -90,50 +95,119 @@ developed by the Forschungsdatenzentrum at LifBi in Bamberg.</p>
 <p>The core of this package is the <code><a href="../reference/read_neps.html">read_neps()</a></code> function. It
 reads data from a NEPS Scientific Use File in
 <strong>dta-format</strong> and attaches associated metadata such as
-labels, question texts, and harmonization rules.</p>
-<p>At its core, the function uses <code>read_dta()</code> from the
-tidyverse package <em>haven</em>, which is very performant with larger
-datasets compared to other dta-readers. It does however not support
-reading (all) attached meta information in the NEPS-SUF-Files. For this
-task the function <code>read.dta13()</code> from the package
+labels, question texts, and harmonization rules as attributes of the
+variables in the dataframe. Moreover, it allows a language switch of
+labels and meta information from German to English.</p>
+<p>Under the hood, the function relies on <code>read_dta()</code> from
+the tidyverse package <em>haven</em>, which is very performant with
+larger datasets compared to other dta-readers. It does however not
+support reading (all) attached meta information in the NEPS-SUF-Files.
+For this task the function <code>read.dta13()</code> from the package
 <em>readstata13</em> is utilized. Since it does not have to read the
 rows of the dataset to get access to the meta information, performance
 with large datasets isnt an issue.</p>
-<!-- Arguments supported by read_neps(): -->
-<!-- 1. datasetpath: Path to the NEPS .dta file. -->
-<!-- 2. col_select: Optional vector of variables to select. -->
-<!-- 3. english: Logical, if TRUE loads English labels and metadata (The default value FALSE will load labels and metadata in German). -->
-<!-- 4. compact_meta: Logical, controls whether to load only key metadata or all of it. -->
-<!-- 5. charren: Logical, if TRUE, replaces variable names with original instrument names. -->
-<p>When argument <em>english</em> is set to TRUE, all variable and value
-labels as well as attached meta information will be switched from German
-(default) to English:</p>
+<p>With the arguments <em>col_select</em> and <em>row_select</em> you
+can specify the columns and rows that the function will read from the
+dataset. By default it will read all columns and rows.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://a-helbig.github.io/nepstools/">nepstools</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># File path to publicly available NEPS semantic file on gaps in lifecourse that is included in this package</span></span>
+<span><span class="co"># file path to NEPS semantic file on gaps in lifecourse that is included in this package</span></span>
+<span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"SC6_spGap_S_15-0-0.dta"</span>, package <span class="op">=</span> <span class="st">"nepstools"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># read data with all cols and rows</span></span>
+<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
+<span><span class="co"># print number of cols and rows</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 36</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co"># print head of df</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 36</span></span></span>
+<span><span class="co">#&gt;    ID_t wave      nepswave  splink spell subspell spgen    spext spstat disagint</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lb&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lb&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>        <span style="color: #BB0000;">NA</span>            <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>    <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 26 more variables: disagwave &lt;dbl+lbl&gt;, ts29101_v1 &lt;dbl+lbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ts29901 &lt;dbl+lbl&gt;, ts29300 &lt;dbl+lbl&gt;, ts29101 &lt;dbl+lbl&gt;, ts29102_O &lt;chr&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ts2911m &lt;dbl+lbl&gt;, ts2911y &lt;dbl+lbl&gt;, ts29103 &lt;dbl+lbl&gt;, ts2912m &lt;dbl+lbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ts2912y &lt;dbl+lbl&gt;, ts2912c &lt;dbl+lbl&gt;, ts2911m_g1 &lt;dbl+lbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ts2911y_g1 &lt;dbl+lbl&gt;, ts2912m_g1 &lt;dbl+lbl&gt;, ts2912y_g1 &lt;dbl+lbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ts2912c_g1 &lt;dbl+lbl&gt;, spms &lt;dbl+lbl&gt;, ts29201 &lt;dbl+lbl&gt;, ts27108 &lt;dbl+lbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   ts27100 &lt;dbl+lbl&gt;, ts2731m &lt;dbl+lbl&gt;, ts2731y &lt;dbl+lbl&gt;, …</span></span></span>
+<span></span>
+<span><span class="co"># read data with variables ID_t and wave only and with 0 rows </span></span>
+<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"wave"</span><span class="op">)</span>, row_select <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="co"># print number of cols and rows</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0</span></span>
+<span><span class="co"># print head of df</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 0 × 2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 variables: ID_t &lt;dbl&gt;, wave &lt;dbl+lbl&gt;</span></span></span></code></pre></div>
+<p>When argument <em>english</em> is set to TRUE, all variable and value
+labels as well as attached meta information will be switched from German
+(default) to English:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://a-helbig.github.io/nepstools/">nepstools</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># file path to NEPS semantic file on gaps in lifecourse that is included in this package</span></span>
 <span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"SC6_spGap_S_15-0-0.dta"</span>, package <span class="op">=</span> <span class="st">"nepstools"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># read data with english labels and meta</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, english <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="co"># Access label and questiontext attribute of a variable</span></span>
+<span><span class="co"># access variable label, value label and questiontext attribute of a variable</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">$</span><span class="va">ts2912m</span>, <span class="st">"label"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "End month gap"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">$</span><span class="va">ts2912m</span>, <span class="st">"labels"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;                   don't know                      refused </span></span>
+<span><span class="co">#&gt;                          -98                          -97 </span></span>
+<span><span class="co">#&gt;                  until today                      January </span></span>
+<span><span class="co">#&gt;                           -5                            1 </span></span>
+<span><span class="co">#&gt;                     February                        March </span></span>
+<span><span class="co">#&gt;                            2                            3 </span></span>
+<span><span class="co">#&gt;                        April                          May </span></span>
+<span><span class="co">#&gt;                            4                            5 </span></span>
+<span><span class="co">#&gt;                         June                         July </span></span>
+<span><span class="co">#&gt;                            6                            7 </span></span>
+<span><span class="co">#&gt;                       August                    September </span></span>
+<span><span class="co">#&gt;                            8                            9 </span></span>
+<span><span class="co">#&gt;                      October                     November </span></span>
+<span><span class="co">#&gt;                           10                           11 </span></span>
+<span><span class="co">#&gt;                     December Beginning of the year/Winter </span></span>
+<span><span class="co">#&gt;                           12                           21 </span></span>
+<span><span class="co">#&gt;                Spring/Easter              Mid-year/Summer </span></span>
+<span><span class="co">#&gt;                           24                           27 </span></span>
+<span><span class="co">#&gt;                         Fall              End of the year </span></span>
+<span><span class="co">#&gt;                           30                           32</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">$</span><span class="va">ts2912m</span>, <span class="st">"NEPS_questiontext"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "(Until when were you &lt;h_modak&gt;?)"</span></span>
 <span></span>
 <span><span class="co"># read data with german labels and meta</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, english <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co"># Access label and questiontext attribute of a variable</span></span>
+<span><span class="co"># access variable label, value label and questiontext attribute of a variable</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">$</span><span class="va">ts2912m</span>, <span class="st">"label"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "Endmonat Lücke"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">$</span><span class="va">ts2912m</span>, <span class="st">"labels"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          weiß nicht   Angabe verweigert           bis heute              Januar </span></span>
+<span><span class="co">#&gt;                 -98                 -97                  -5                   1 </span></span>
+<span><span class="co">#&gt;             Februar                März               April                 Mai </span></span>
+<span><span class="co">#&gt;                   2                   3                   4                   5 </span></span>
+<span><span class="co">#&gt;                Juni                Juli              August           September </span></span>
+<span><span class="co">#&gt;                   6                   7                   8                   9 </span></span>
+<span><span class="co">#&gt;             Oktober            November            Dezember Jahresanfang/Winter </span></span>
+<span><span class="co">#&gt;                  10                  11                  12                  21 </span></span>
+<span><span class="co">#&gt;     Frühjahr/Ostern  Jahresmitte/Sommer              Herbst          Jahresende </span></span>
+<span><span class="co">#&gt;                  24                  27                  30                  32</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">$</span><span class="va">ts2912m</span>, <span class="st">"NEPS_questiontext"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] "(Bis wann waren Sie &lt;h_modak&gt;?)"</span></span></code></pre></div>
 <p>When argument <em>compact_meta</em> is set to TRUE (default), only
 the following meta infos will be attached if available: questiontext,
 interview-instruction-text, harmonization rule and alias. If set to
 FALSE, all available meta infos will be attached.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read data with minimum available meta info</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, compact_meta <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co"># show how many attributes are being attached to the data</span></span>
@@ -149,7 +223,7 @@ FALSE, all available meta infos will be attached.</p>
 replaced with instrument names where available. These instrument names
 may be more intuitive for some NEPS data users, as they are often more
 self-explanatory.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read data with minimum available meta info</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, charren <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co"># print names of dataset</span></span>
@@ -188,9 +262,9 @@ self-explanatory.</p>
 <p>NEPS datasets use various negative codes to indicate different types
 of missing values. The <code><a href="../reference/replace_values_with_na.html">replace_values_with_na()</a></code> function
 replaces these codes by NA for easier handling in R.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read data with variables: "ID" and "enddate of episode"</span></span>
-<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2912m"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2912m"</span><span class="op">)</span>, row_select <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="co"># create some artificial datapoints </span></span>
 <span><span class="va">artificial_datapoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -201,28 +275,22 @@ replaces these codes by NA for easier handling in R.</p>
 <span><span class="co"># add these artificial datapoints to the empty neps dataset</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
-<span><span class="co">#&gt;    ID_t ts2912m                </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>              </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    <span style="color: #BB0000;">NA</span>  <span style="color: #BB0000;">NA</span>                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     1 -<span style="color: #BB0000;">97</span><span style="color: #949494;"> [Angabe verweigert]</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     2  12<span style="color: #949494;"> [Dezember]</span>         </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     3  <span style="color: #BB0000;">NA</span>                    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     4   4<span style="color: #949494;"> [April]</span>            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     5 -<span style="color: #BB0000;">98</span><span style="color: #949494;"> [weiß nicht]</span></span></span>
+<span><span class="co">#&gt;   ID_t ts2912m</span></span>
+<span><span class="co">#&gt; 1    1     -97</span></span>
+<span><span class="co">#&gt; 2    2      12</span></span>
+<span><span class="co">#&gt; 3    3      NA</span></span>
+<span><span class="co">#&gt; 4    4       4</span></span>
+<span><span class="co">#&gt; 5    5     -98</span></span>
 <span></span>
 <span><span class="co"># now use the replace_values_with_na function</span></span>
 <span><span class="va">df_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/replace_values_with_na.html">replace_values_with_na</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_clean</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
-<span><span class="co">#&gt;    ID_t ts2912m      </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    <span style="color: #BB0000;">NA</span> <span style="color: #BB0000;">NA</span>           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     1 <span style="color: #BB0000;">NA</span>           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     2 12<span style="color: #949494;"> [Dezember]</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     3 <span style="color: #BB0000;">NA</span>           </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     4  4<span style="color: #949494;"> [April]</span>   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     5 <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   ID_t ts2912m</span></span>
+<span><span class="co">#&gt; 1    1      NA</span></span>
+<span><span class="co">#&gt; 2    2      12</span></span>
+<span><span class="co">#&gt; 3    3      NA</span></span>
+<span><span class="co">#&gt; 4    4       4</span></span>
+<span><span class="co">#&gt; 5    5      NA</span></span></code></pre></div>
 <p>If you do want all variables to be considered in the function, you
 can specify variables in the <em>vars</em> argument. In addition you can
 provide custom missing value codes to be considered with the argument
@@ -237,9 +305,9 @@ events with seasons instead of exact months. The codes for these seasons
 are 21,24,27,30 and 32 and correspond to January (1 + 20), April (4 +
 20) and so on. Use the function <code><a href="../reference/replace_season_codes.html">replace_season_codes()</a></code> to
 revert these season codes to standard month codes.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read data with variables: "ID" and "enddate of episode"</span></span>
-<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2912m"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2912m"</span><span class="op">)</span>, row_select <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># create some artificial datapoints </span></span>
 <span><span class="va">artificial_datapoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -250,27 +318,21 @@ revert these season codes to standard month codes.</p>
 <span><span class="co"># add these artificial datapoints to the empty neps dataset</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
-<span><span class="co">#&gt;    ID_t ts2912m              </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    <span style="color: #BB0000;">NA</span>  <span style="color: #BB0000;">NA</span>                  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     1  24<span style="color: #949494;"> [Frühjahr/Ostern]</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     2  12<span style="color: #949494;"> [Dezember]</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     3  32<span style="color: #949494;"> [Jahresende]</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     4   4<span style="color: #949494;"> [April]</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     5 -<span style="color: #BB0000;">98</span><span style="color: #949494;"> [weiß nicht]</span></span></span>
+<span><span class="co">#&gt;   ID_t ts2912m</span></span>
+<span><span class="co">#&gt; 1    1      24</span></span>
+<span><span class="co">#&gt; 2    2      12</span></span>
+<span><span class="co">#&gt; 3    3      32</span></span>
+<span><span class="co">#&gt; 4    4       4</span></span>
+<span><span class="co">#&gt; 5    5     -98</span></span>
 <span></span>
 <span><span class="va">df_month_recoded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/replace_season_codes.html">replace_season_codes</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_month_recoded</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
-<span><span class="co">#&gt;    ID_t ts2912m         </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>    <span style="color: #BB0000;">NA</span>  <span style="color: #BB0000;">NA</span>             </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     1   4<span style="color: #949494;"> [April]</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     2  12<span style="color: #949494;"> [Dezember]</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     3  12<span style="color: #949494;"> [Dezember]</span>  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     4   4<span style="color: #949494;"> [April]</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>     5 -<span style="color: #BB0000;">98</span><span style="color: #949494;"> [weiß nicht]</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   ID_t ts2912m</span></span>
+<span><span class="co">#&gt; 1    1      24</span></span>
+<span><span class="co">#&gt; 2    2      12</span></span>
+<span><span class="co">#&gt; 3    3      32</span></span>
+<span><span class="co">#&gt; 4    4       4</span></span>
+<span><span class="co">#&gt; 5    5     -98</span></span></code></pre></div>
 <p>Note that if the <em>vars</em> argument is NULL (the default), only
 variables with label attributes containing “month” or “monat” are
 processed. Alternatively, you can explicitly specify which variables to
@@ -283,18 +345,18 @@ include.</p>
 years. The <code><a href="../reference/expand.html">expand()</a></code> function replicates rows according to
 the length of a specified duration variable. This function is inspired
 by statas expand function.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read data with variables: "ID" and "enddate of episode"</span></span>
-<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2911m"</span>, <span class="st">"ts2911y"</span>, <span class="st">"ts2912m"</span>, <span class="st">"ts2912y"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="va">df_neps</span><span class="op">[</span><span class="op">-</span><span class="fl">1</span>,<span class="op">]</span> <span class="co"># get rid of NA row that is in every semantic structure file from NEPS</span></span>
+<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2911m"</span>, <span class="st">"ts2911y"</span>, <span class="st">"ts2912m"</span>, <span class="st">"ts2912y"</span><span class="op">)</span>, row_select <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># create some artificial datapoints </span></span>
 <span><span class="va">artificial_datapoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>  ID_t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span>, <span class="fl">4</span>, <span class="fl">5</span><span class="op">)</span>,</span>
-<span>  ts2911m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">12</span>, <span class="fl">11</span>, <span class="fl">4</span>, <span class="fl">12</span><span class="op">)</span>,</span>
-<span>  ts2911y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2008</span>, <span class="fl">2006</span>, <span class="fl">2005</span>, <span class="fl">2009</span>, <span class="fl">2010</span><span class="op">)</span>,</span>
-<span>  ts2912m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span>  ts2912y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2008</span>, <span class="fl">2007</span>, <span class="fl">2006</span>, <span class="fl">2009</span>, <span class="fl">2011</span><span class="op">)</span></span>
+<span>  ID_t <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  sptype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">24</span>,<span class="fl">26</span>,<span class="fl">25</span>,<span class="fl">26</span>,<span class="fl">27</span><span class="op">)</span>,</span>
+<span>  ts2911m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">11</span>, <span class="fl">3</span>, <span class="fl">12</span><span class="op">)</span>,</span>
+<span>  ts2911y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2008</span>, <span class="fl">2008</span>, <span class="fl">2005</span>, <span class="fl">2006</span>, <span class="fl">2010</span><span class="op">)</span>,</span>
+<span>  ts2912m <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">4</span>, <span class="fl">8</span>, <span class="fl">2</span>, <span class="fl">5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
+<span>  ts2912y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2008</span>, <span class="fl">2008</span>, <span class="fl">2006</span>, <span class="fl">2006</span>, <span class="fl">2011</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># add these artificial datapoints to the empty neps dataset</span></span>
@@ -307,55 +369,59 @@ by statas expand function.</p>
 <span>                duration <span class="op">=</span> <span class="op">(</span><span class="va">end</span> <span class="op">-</span> <span class="va">start</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># + 1 required so we dont get episode durations of 0 months</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ID_t ts2911m ts2911y ts2912m ts2912y start end duration</span></span>
-<span><span class="co">#&gt; 1    1       2    2008       4    2008   577 579        3</span></span>
-<span><span class="co">#&gt; 2    2      12    2006       1    2007   563 564        2</span></span>
-<span><span class="co">#&gt; 3    3      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 4    4       4    2009       5    2009   591 592        2</span></span>
-<span><span class="co">#&gt; 5    5      12    2010       2    2011   611 613        3</span></span>
+<span><span class="co">#&gt;   ID_t sptype ts2911m ts2911y ts2912m ts2912y start end duration</span></span>
+<span><span class="co">#&gt; 1    1     24       2    2008       4    2008   577 579        3</span></span>
+<span><span class="co">#&gt; 2    1     26       5    2008       8    2008   580 583        4</span></span>
+<span><span class="co">#&gt; 3    2     25      11    2005       2    2006   550 553        4</span></span>
+<span><span class="co">#&gt; 4    2     26       3    2006       5    2006   554 556        3</span></span>
+<span><span class="co">#&gt; 5    3     27      12    2010       1    2011   611 612        2</span></span>
 <span></span>
 <span><span class="co"># expand the dataframe</span></span>
 <span><span class="va">expanded_df</span> <span class="op">&lt;-</span> <span class="fu">nepstools</span><span class="fu">::</span><span class="fu"><a href="../reference/expand.html">expand</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">duration</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expanded_df</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     ID_t ts2911m ts2911y ts2912m ts2912y start end duration</span></span>
-<span><span class="co">#&gt; 1      1       2    2008       4    2008   577 579        3</span></span>
-<span><span class="co">#&gt; 1.1    1       2    2008       4    2008   577 579        3</span></span>
-<span><span class="co">#&gt; 1.2    1       2    2008       4    2008   577 579        3</span></span>
-<span><span class="co">#&gt; 2      2      12    2006       1    2007   563 564        2</span></span>
-<span><span class="co">#&gt; 2.1    2      12    2006       1    2007   563 564        2</span></span>
-<span><span class="co">#&gt; 3      3      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 3.1    3      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 3.2    3      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 3.3    3      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 4      4       4    2009       5    2009   591 592        2</span></span>
-<span><span class="co">#&gt; 4.1    4       4    2009       5    2009   591 592        2</span></span>
-<span><span class="co">#&gt; 5      5      12    2010       2    2011   611 613        3</span></span>
-<span><span class="co">#&gt; 5.1    5      12    2010       2    2011   611 613        3</span></span>
-<span><span class="co">#&gt; 5.2    5      12    2010       2    2011   611 613        3</span></span>
+<span><span class="co">#&gt;     ID_t sptype ts2911m ts2911y ts2912m ts2912y start end duration</span></span>
+<span><span class="co">#&gt; 1      1     24       2    2008       4    2008   577 579        3</span></span>
+<span><span class="co">#&gt; 1.1    1     24       2    2008       4    2008   577 579        3</span></span>
+<span><span class="co">#&gt; 1.2    1     24       2    2008       4    2008   577 579        3</span></span>
+<span><span class="co">#&gt; 2      1     26       5    2008       8    2008   580 583        4</span></span>
+<span><span class="co">#&gt; 2.1    1     26       5    2008       8    2008   580 583        4</span></span>
+<span><span class="co">#&gt; 2.2    1     26       5    2008       8    2008   580 583        4</span></span>
+<span><span class="co">#&gt; 2.3    1     26       5    2008       8    2008   580 583        4</span></span>
+<span><span class="co">#&gt; 3      2     25      11    2005       2    2006   550 553        4</span></span>
+<span><span class="co">#&gt; 3.1    2     25      11    2005       2    2006   550 553        4</span></span>
+<span><span class="co">#&gt; 3.2    2     25      11    2005       2    2006   550 553        4</span></span>
+<span><span class="co">#&gt; 3.3    2     25      11    2005       2    2006   550 553        4</span></span>
+<span><span class="co">#&gt; 4      2     26       3    2006       5    2006   554 556        3</span></span>
+<span><span class="co">#&gt; 4.1    2     26       3    2006       5    2006   554 556        3</span></span>
+<span><span class="co">#&gt; 4.2    2     26       3    2006       5    2006   554 556        3</span></span>
+<span><span class="co">#&gt; 5      3     27      12    2010       1    2011   611 612        2</span></span>
+<span><span class="co">#&gt; 5.1    3     27      12    2010       1    2011   611 612        2</span></span>
 <span></span>
 <span><span class="co"># create month indicator - May use a package like lubridate to get a nicer formating for date variables.</span></span>
 <span><span class="va">expanded_df</span> <span class="op">&lt;-</span> <span class="va">expanded_df</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">ID_t</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>month <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">first</a></span><span class="op">(</span><span class="va">start</span><span class="op">)</span> <span class="op">+</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/row_number.html" class="external-link">row_number</a></span><span class="op">(</span><span class="op">)</span> <span class="op">-</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expanded_df</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 14 × 9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   ID_t [5]</span></span></span>
-<span><span class="co">#&gt;     ID_t ts2911m ts2911y ts2912m ts2912y start   end duration month</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   577</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   578</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   579</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     2      12    <span style="text-decoration: underline;">2</span>006       1    <span style="text-decoration: underline;">2</span>007   563   564        2   563</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     2      12    <span style="text-decoration: underline;">2</span>006       1    <span style="text-decoration: underline;">2</span>007   563   564        2   564</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     3      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   550</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     3      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   551</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     3      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   552</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     3      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   553</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     4       4    <span style="text-decoration: underline;">2</span>009       5    <span style="text-decoration: underline;">2</span>009   591   592        2   591</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>     4       4    <span style="text-decoration: underline;">2</span>009       5    <span style="text-decoration: underline;">2</span>009   591   592        2   592</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>     5      12    <span style="text-decoration: underline;">2</span>010       2    <span style="text-decoration: underline;">2</span>011   611   613        3   611</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>     5      12    <span style="text-decoration: underline;">2</span>010       2    <span style="text-decoration: underline;">2</span>011   611   613        3   612</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>     5      12    <span style="text-decoration: underline;">2</span>010       2    <span style="text-decoration: underline;">2</span>011   611   613        3   613</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 16 × 10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># Groups:   ID_t [3]</span></span></span>
+<span><span class="co">#&gt;     ID_t sptype ts2911m ts2911y ts2912m ts2912y start   end duration month</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1     24       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   577</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1     24       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   578</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1     24       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   579</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1     26       5    <span style="text-decoration: underline;">2</span>008       8    <span style="text-decoration: underline;">2</span>008   580   583        4   580</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1     26       5    <span style="text-decoration: underline;">2</span>008       8    <span style="text-decoration: underline;">2</span>008   580   583        4   581</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1     26       5    <span style="text-decoration: underline;">2</span>008       8    <span style="text-decoration: underline;">2</span>008   580   583        4   582</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1     26       5    <span style="text-decoration: underline;">2</span>008       8    <span style="text-decoration: underline;">2</span>008   580   583        4   583</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     2     25      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   550</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     2     25      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   551</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     2     25      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   552</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>     2     25      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   553</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>     2     26       3    <span style="text-decoration: underline;">2</span>006       5    <span style="text-decoration: underline;">2</span>006   554   556        3   554</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>     2     26       3    <span style="text-decoration: underline;">2</span>006       5    <span style="text-decoration: underline;">2</span>006   554   556        3   555</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>     2     26       3    <span style="text-decoration: underline;">2</span>006       5    <span style="text-decoration: underline;">2</span>006   554   556        3   556</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>     3     27      12    <span style="text-decoration: underline;">2</span>010       1    <span style="text-decoration: underline;">2</span>011   611   612        2   611</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>     3     27      12    <span style="text-decoration: underline;">2</span>010       1    <span style="text-decoration: underline;">2</span>011   611   612        2   612</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="extracting-question-texts">5. Extracting question texts<a class="anchor" aria-label="anchor" href="#extracting-question-texts"></a>
@@ -365,7 +431,7 @@ in German or English. Use the convenient wrapper <code><a href="../reference/que
 to print the question text for a specified variable. The language will
 depend on the argument english (TRUE or FALSE) in the
 <code><a href="../reference/read_neps.html">read_neps()</a></code> function.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read data with variables: "ID" and "enddate of episode"</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2912m"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -380,7 +446,7 @@ info)<a class="anchor" aria-label="anchor" href="#search-for-keywords-in-attribu
 attributes of each variable in a dataframe loaded with
 <code><a href="../reference/read_neps.html">read_neps()</a></code> for specified keywords. It is case insensitive
 by default.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read data with variables: "ID" and "enddate of episode"</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, english <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>

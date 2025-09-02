@@ -13,6 +13,7 @@
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Simplifies working with NEPS data">
 <meta name="description" content="Functions that help NEPS data users to work with the scientific use files of the NEPS. Load NEPS data with german or english variable and value labels and all relevant meta data attached. Handle missings and season codes quickly and much more.">
 <meta property="og:description" content="Functions that help NEPS data users to work with the scientific use files of the NEPS. Load NEPS data with german or english variable and value labels and all relevant meta data attached. Handle missings and season codes quickly and much more.">
+<meta property="og:image" content="https://a-helbig.github.io/nepstools/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -46,8 +47,11 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="nepstools">nepstools<a class="anchor" aria-label="anchor" href="#nepstools"></a>
-</h1></div>
+<div class="page-header">
+<img src="logo.png" class="logo" alt=""><h1 id="nepstools-">nepstools 
+<a class="anchor" aria-label="anchor" href="#nepstools-"></a>
+</h1>
+</div>
 <!-- badges: start -->
 <!-- badges: end -->
 <p>This package facilitates working with R and NEPS SUF data. Its main feature — and the core of the package — is a function that efficiently reads NEPS SUF files in statas dta format. It allows you to specify German or English language, a switch to instrument variable names and access to all attached meta information on variables. It builds upon haven’s read_dta() and readstata13’s read.dta13() functions, leveraging the strengths of both. The package is inspired by the stata ado <a href="https://www.neps-data.de/Datenzentrum/Forschungsdaten/Datentools-f%C3%BCr-Stata" class="external-link">nepstools</a> developed by the FDZ of the Lifbi in Bamberg, Germany.</p>
@@ -90,7 +94,7 @@
 <li>
 <code><a href="reference/expand.html">expand()</a></code>: expanding episode data by duration</li>
 <li>
-<code><a href="reference/question.html">question()</a></code>: convenient wrapper for printing question texts</li>
+<code><a href="reference/question.html">question()</a></code>: wrapper of attr function for printing question texts</li>
 <li>
 <code><a href="reference/lookfor_meta.html">lookfor_meta()</a></code>: searching for keywords in attributes of dataframe columns (meta info)</li>
 </ol>
