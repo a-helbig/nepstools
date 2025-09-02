@@ -273,24 +273,28 @@ replaces these codes by NA for easier handling in R.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># add these artificial datapoints to the empty neps dataset</span></span>
-<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span>
+<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ID_t ts2912m</span></span>
-<span><span class="co">#&gt; 1    1     -97</span></span>
-<span><span class="co">#&gt; 2    2      12</span></span>
-<span><span class="co">#&gt; 3    3      NA</span></span>
-<span><span class="co">#&gt; 4    4       4</span></span>
-<span><span class="co">#&gt; 5    5     -98</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;    ID_t ts2912m                </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>              </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 -<span style="color: #BB0000;">97</span><span style="color: #949494;"> [Angabe verweigert]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2  12<span style="color: #949494;"> [Dezember]</span>         </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3  <span style="color: #BB0000;">NA</span>                    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4   4<span style="color: #949494;"> [April]</span>            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 -<span style="color: #BB0000;">98</span><span style="color: #949494;"> [weiß nicht]</span></span></span>
 <span></span>
 <span><span class="co"># now use the replace_values_with_na function</span></span>
 <span><span class="va">df_clean</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/replace_values_with_na.html">replace_values_with_na</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_clean</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ID_t ts2912m</span></span>
-<span><span class="co">#&gt; 1    1      NA</span></span>
-<span><span class="co">#&gt; 2    2      12</span></span>
-<span><span class="co">#&gt; 3    3      NA</span></span>
-<span><span class="co">#&gt; 4    4       4</span></span>
-<span><span class="co">#&gt; 5    5      NA</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;    ID_t ts2912m      </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 <span style="color: #BB0000;">NA</span>           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 12<span style="color: #949494;"> [Dezember]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3 <span style="color: #BB0000;">NA</span>           </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4  4<span style="color: #949494;"> [April]</span>   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
 <p>If you do want all variables to be considered in the function, you
 can specify variables in the <em>vars</em> argument. In addition you can
 provide custom missing value codes to be considered with the argument
@@ -308,6 +312,8 @@ revert these season codes to standard month codes.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read data with variables: "ID" and "enddate of episode"</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/read_neps.html">read_neps</a></span><span class="op">(</span><span class="va">path</span>, col_select <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ID_t"</span>, <span class="st">"ts2912m"</span><span class="op">)</span>, row_select <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">$</span><span class="va">ts2912m</span>, <span class="st">"label"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Endmonat Lücke"</span></span>
 <span></span>
 <span><span class="co"># create some artificial datapoints </span></span>
 <span><span class="va">artificial_datapoints</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -316,23 +322,30 @@ revert these season codes to standard month codes.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># add these artificial datapoints to the empty neps dataset</span></span>
-<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span>
+<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ID_t ts2912m</span></span>
-<span><span class="co">#&gt; 1    1      24</span></span>
-<span><span class="co">#&gt; 2    2      12</span></span>
-<span><span class="co">#&gt; 3    3      32</span></span>
-<span><span class="co">#&gt; 4    4       4</span></span>
-<span><span class="co">#&gt; 5    5     -98</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;    ID_t ts2912m              </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>            </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1  24<span style="color: #949494;"> [Frühjahr/Ostern]</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2  12<span style="color: #949494;"> [Dezember]</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3  32<span style="color: #949494;"> [Jahresende]</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4   4<span style="color: #949494;"> [April]</span>          </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 -<span style="color: #BB0000;">98</span><span style="color: #949494;"> [weiß nicht]</span></span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">$</span><span class="va">ts2912m</span>, <span class="st">"label"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "Endmonat Lücke"</span></span>
 <span></span>
+<span><span class="co"># use the function to replace season codes with corresponding months</span></span>
 <span><span class="va">df_month_recoded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/replace_season_codes.html">replace_season_codes</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_month_recoded</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ID_t ts2912m</span></span>
-<span><span class="co">#&gt; 1    1      24</span></span>
-<span><span class="co">#&gt; 2    2      12</span></span>
-<span><span class="co">#&gt; 3    3      32</span></span>
-<span><span class="co">#&gt; 4    4       4</span></span>
-<span><span class="co">#&gt; 5    5     -98</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 2</span></span></span>
+<span><span class="co">#&gt;    ID_t ts2912m         </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1   4<span style="color: #949494;"> [April]</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2  12<span style="color: #949494;"> [Dezember]</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     3  12<span style="color: #949494;"> [Dezember]</span>  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     4   4<span style="color: #949494;"> [April]</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     5 -<span style="color: #BB0000;">98</span><span style="color: #949494;"> [weiß nicht]</span></span></span></code></pre></div>
 <p>Note that if the <em>vars</em> argument is NULL (the default), only
 variables with label attributes containing “month” or “monat” are
 processed. Alternatively, you can explicitly specify which variables to
@@ -360,7 +373,7 @@ by statas expand function.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># add these artificial datapoints to the empty neps dataset</span></span>
-<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span>
+<span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">artificial_datapoints</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># generate date and duration variables</span></span>
 <span><span class="va">df_neps</span> <span class="op">&lt;-</span> <span class="va">df_neps</span> <span class="op">|&gt;</span> </span>
@@ -369,33 +382,37 @@ by statas expand function.</p>
 <span>                duration <span class="op">=</span> <span class="op">(</span><span class="va">end</span> <span class="op">-</span> <span class="va">start</span><span class="op">)</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># + 1 required so we dont get episode durations of 0 months</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">df_neps</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ID_t sptype ts2911m ts2911y ts2912m ts2912y start end duration</span></span>
-<span><span class="co">#&gt; 1    1     24       2    2008       4    2008   577 579        3</span></span>
-<span><span class="co">#&gt; 2    1     26       5    2008       8    2008   580 583        4</span></span>
-<span><span class="co">#&gt; 3    2     25      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 4    2     26       3    2006       5    2006   554 556        3</span></span>
-<span><span class="co">#&gt; 5    3     27      12    2010       1    2011   611 612        2</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 9</span></span></span>
+<span><span class="co">#&gt;    ID_t ts2911m       ts2911y   ts2912m     ts2912y  sptype start   end duration</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+lb&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1  2<span style="color: #949494;"> [Februar]</span>  <span style="text-decoration: underline;">2</span>008      4<span style="color: #949494;"> [April]</span>   <span style="text-decoration: underline;">2</span>008         24   577   579        3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008      8<span style="color: #949494;"> [August]</span>  <span style="text-decoration: underline;">2</span>008         26   580   583        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005      2<span style="color: #949494;"> [Februar]</span> <span style="text-decoration: underline;">2</span>006         25   550   553        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>     2  3<span style="color: #949494;"> [März]</span>     <span style="text-decoration: underline;">2</span>006      5<span style="color: #949494;"> [Mai]</span>     <span style="text-decoration: underline;">2</span>006         26   554   556        3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>     3 12<span style="color: #949494;"> [Dezember]</span> <span style="text-decoration: underline;">2</span>010      1<span style="color: #949494;"> [Januar]</span>  <span style="text-decoration: underline;">2</span>011         27   611   612        2</span></span>
 <span></span>
 <span><span class="co"># expand the dataframe</span></span>
 <span><span class="va">expanded_df</span> <span class="op">&lt;-</span> <span class="fu">nepstools</span><span class="fu">::</span><span class="fu"><a href="../reference/expand.html">expand</a></span><span class="op">(</span><span class="va">df_neps</span>, <span class="va">duration</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expanded_df</span><span class="op">)</span></span>
-<span><span class="co">#&gt;     ID_t sptype ts2911m ts2911y ts2912m ts2912y start end duration</span></span>
-<span><span class="co">#&gt; 1      1     24       2    2008       4    2008   577 579        3</span></span>
-<span><span class="co">#&gt; 1.1    1     24       2    2008       4    2008   577 579        3</span></span>
-<span><span class="co">#&gt; 1.2    1     24       2    2008       4    2008   577 579        3</span></span>
-<span><span class="co">#&gt; 2      1     26       5    2008       8    2008   580 583        4</span></span>
-<span><span class="co">#&gt; 2.1    1     26       5    2008       8    2008   580 583        4</span></span>
-<span><span class="co">#&gt; 2.2    1     26       5    2008       8    2008   580 583        4</span></span>
-<span><span class="co">#&gt; 2.3    1     26       5    2008       8    2008   580 583        4</span></span>
-<span><span class="co">#&gt; 3      2     25      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 3.1    2     25      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 3.2    2     25      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 3.3    2     25      11    2005       2    2006   550 553        4</span></span>
-<span><span class="co">#&gt; 4      2     26       3    2006       5    2006   554 556        3</span></span>
-<span><span class="co">#&gt; 4.1    2     26       3    2006       5    2006   554 556        3</span></span>
-<span><span class="co">#&gt; 4.2    2     26       3    2006       5    2006   554 556        3</span></span>
-<span><span class="co">#&gt; 5      3     27      12    2010       1    2011   611 612        2</span></span>
-<span><span class="co">#&gt; 5.1    3     27      12    2010       1    2011   611 612        2</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 16 × 9</span></span></span>
+<span><span class="co">#&gt;     ID_t ts2911m       ts2911y   ts2912m     ts2912y sptype start   end duration</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl+l&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1  2<span style="color: #949494;"> [Februar]</span>  <span style="text-decoration: underline;">2</span>008      4<span style="color: #949494;"> [April]</span>   <span style="text-decoration: underline;">2</span>008        24   577   579        3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1  2<span style="color: #949494;"> [Februar]</span>  <span style="text-decoration: underline;">2</span>008      4<span style="color: #949494;"> [April]</span>   <span style="text-decoration: underline;">2</span>008        24   577   579        3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1  2<span style="color: #949494;"> [Februar]</span>  <span style="text-decoration: underline;">2</span>008      4<span style="color: #949494;"> [April]</span>   <span style="text-decoration: underline;">2</span>008        24   577   579        3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008      8<span style="color: #949494;"> [August]</span>  <span style="text-decoration: underline;">2</span>008        26   580   583        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008      8<span style="color: #949494;"> [August]</span>  <span style="text-decoration: underline;">2</span>008        26   580   583        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008      8<span style="color: #949494;"> [August]</span>  <span style="text-decoration: underline;">2</span>008        26   580   583        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008      8<span style="color: #949494;"> [August]</span>  <span style="text-decoration: underline;">2</span>008        26   580   583        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005      2<span style="color: #949494;"> [Februar]</span> <span style="text-decoration: underline;">2</span>006        25   550   553        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005      2<span style="color: #949494;"> [Februar]</span> <span style="text-decoration: underline;">2</span>006        25   550   553        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005      2<span style="color: #949494;"> [Februar]</span> <span style="text-decoration: underline;">2</span>006        25   550   553        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005      2<span style="color: #949494;"> [Februar]</span> <span style="text-decoration: underline;">2</span>006        25   550   553        4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>     2  3<span style="color: #949494;"> [März]</span>     <span style="text-decoration: underline;">2</span>006      5<span style="color: #949494;"> [Mai]</span>     <span style="text-decoration: underline;">2</span>006        26   554   556        3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>     2  3<span style="color: #949494;"> [März]</span>     <span style="text-decoration: underline;">2</span>006      5<span style="color: #949494;"> [Mai]</span>     <span style="text-decoration: underline;">2</span>006        26   554   556        3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>     2  3<span style="color: #949494;"> [März]</span>     <span style="text-decoration: underline;">2</span>006      5<span style="color: #949494;"> [Mai]</span>     <span style="text-decoration: underline;">2</span>006        26   554   556        3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>     3 12<span style="color: #949494;"> [Dezember]</span> <span style="text-decoration: underline;">2</span>010      1<span style="color: #949494;"> [Januar]</span>  <span style="text-decoration: underline;">2</span>011        27   611   612        2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>     3 12<span style="color: #949494;"> [Dezember]</span> <span style="text-decoration: underline;">2</span>010      1<span style="color: #949494;"> [Januar]</span>  <span style="text-decoration: underline;">2</span>011        27   611   612        2</span></span>
 <span></span>
 <span><span class="co"># create month indicator - May use a package like lubridate to get a nicer formating for date variables.</span></span>
 <span><span class="va">expanded_df</span> <span class="op">&lt;-</span> <span class="va">expanded_df</span> <span class="op">|&gt;</span> </span>
@@ -404,24 +421,24 @@ by statas expand function.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">expanded_df</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 16 × 10</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># Groups:   ID_t [3]</span></span></span>
-<span><span class="co">#&gt;     ID_t sptype ts2911m ts2911y ts2912m ts2912y start   end duration month</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1     24       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   577</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1     24       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   578</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1     24       2    <span style="text-decoration: underline;">2</span>008       4    <span style="text-decoration: underline;">2</span>008   577   579        3   579</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1     26       5    <span style="text-decoration: underline;">2</span>008       8    <span style="text-decoration: underline;">2</span>008   580   583        4   580</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1     26       5    <span style="text-decoration: underline;">2</span>008       8    <span style="text-decoration: underline;">2</span>008   580   583        4   581</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1     26       5    <span style="text-decoration: underline;">2</span>008       8    <span style="text-decoration: underline;">2</span>008   580   583        4   582</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1     26       5    <span style="text-decoration: underline;">2</span>008       8    <span style="text-decoration: underline;">2</span>008   580   583        4   583</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     2     25      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   550</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     2     25      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   551</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     2     25      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   552</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>     2     25      11    <span style="text-decoration: underline;">2</span>005       2    <span style="text-decoration: underline;">2</span>006   550   553        4   553</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>     2     26       3    <span style="text-decoration: underline;">2</span>006       5    <span style="text-decoration: underline;">2</span>006   554   556        3   554</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>     2     26       3    <span style="text-decoration: underline;">2</span>006       5    <span style="text-decoration: underline;">2</span>006   554   556        3   555</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>     2     26       3    <span style="text-decoration: underline;">2</span>006       5    <span style="text-decoration: underline;">2</span>006   554   556        3   556</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>     3     27      12    <span style="text-decoration: underline;">2</span>010       1    <span style="text-decoration: underline;">2</span>011   611   612        2   611</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>     3     27      12    <span style="text-decoration: underline;">2</span>010       1    <span style="text-decoration: underline;">2</span>011   611   612        2   612</span></span></code></pre></div>
+<span><span class="co">#&gt;     ID_t ts2911m       ts2911y ts2912m ts2912y sptype start   end duration month</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+lbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl+l&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+l&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl+l&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>     1  2<span style="color: #949494;"> [Februar]</span>  <span style="text-decoration: underline;">2</span>008    4<span style="color: #949494;"> [Apr…</span> <span style="text-decoration: underline;">2</span>008        24   577   579        3   577</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>     1  2<span style="color: #949494;"> [Februar]</span>  <span style="text-decoration: underline;">2</span>008    4<span style="color: #949494;"> [Apr…</span> <span style="text-decoration: underline;">2</span>008        24   577   579        3   578</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>     1  2<span style="color: #949494;"> [Februar]</span>  <span style="text-decoration: underline;">2</span>008    4<span style="color: #949494;"> [Apr…</span> <span style="text-decoration: underline;">2</span>008        24   577   579        3   579</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008    8<span style="color: #949494;"> [Aug…</span> <span style="text-decoration: underline;">2</span>008        26   580   583        4   580</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008    8<span style="color: #949494;"> [Aug…</span> <span style="text-decoration: underline;">2</span>008        26   580   583        4   581</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008    8<span style="color: #949494;"> [Aug…</span> <span style="text-decoration: underline;">2</span>008        26   580   583        4   582</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>     1  5<span style="color: #949494;"> [Mai]</span>      <span style="text-decoration: underline;">2</span>008    8<span style="color: #949494;"> [Aug…</span> <span style="text-decoration: underline;">2</span>008        26   580   583        4   583</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005    2<span style="color: #949494;"> [Feb…</span> <span style="text-decoration: underline;">2</span>006        25   550   553        4   550</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005    2<span style="color: #949494;"> [Feb…</span> <span style="text-decoration: underline;">2</span>006        25   550   553        4   551</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005    2<span style="color: #949494;"> [Feb…</span> <span style="text-decoration: underline;">2</span>006        25   550   553        4   552</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>     2 11<span style="color: #949494;"> [November]</span> <span style="text-decoration: underline;">2</span>005    2<span style="color: #949494;"> [Feb…</span> <span style="text-decoration: underline;">2</span>006        25   550   553        4   553</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>     2  3<span style="color: #949494;"> [März]</span>     <span style="text-decoration: underline;">2</span>006    5<span style="color: #949494;"> [Mai]</span> <span style="text-decoration: underline;">2</span>006        26   554   556        3   554</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>     2  3<span style="color: #949494;"> [März]</span>     <span style="text-decoration: underline;">2</span>006    5<span style="color: #949494;"> [Mai]</span> <span style="text-decoration: underline;">2</span>006        26   554   556        3   555</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>     2  3<span style="color: #949494;"> [März]</span>     <span style="text-decoration: underline;">2</span>006    5<span style="color: #949494;"> [Mai]</span> <span style="text-decoration: underline;">2</span>006        26   554   556        3   556</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>     3 12<span style="color: #949494;"> [Dezember]</span> <span style="text-decoration: underline;">2</span>010    1<span style="color: #949494;"> [Jan…</span> <span style="text-decoration: underline;">2</span>011        27   611   612        2   611</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>     3 12<span style="color: #949494;"> [Dezember]</span> <span style="text-decoration: underline;">2</span>010    1<span style="color: #949494;"> [Jan…</span> <span style="text-decoration: underline;">2</span>011        27   611   612        2   612</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="extracting-question-texts">5. Extracting question texts<a class="anchor" aria-label="anchor" href="#extracting-question-texts"></a>
