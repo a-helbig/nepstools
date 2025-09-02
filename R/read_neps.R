@@ -144,7 +144,7 @@ read_neps <- function(datasetpath, col_select = NULL, row_select = Inf, english 
 
 
 #' A helper to extract meta info from data
-#'
+#' @noRd
 #' @keywords internal
 read_exp_fields <- function(datapath) {
 
@@ -169,7 +169,7 @@ read_exp_fields <- function(datapath) {
 }
 
 #' A Helper to switch variable names in NEPS data to original instrument variable names. This feature is inspired by stata nepstools "charren" function. Background: During the data preparation process for the NEPS SUFs, the original variable names from the survey instruments are replaced with SUF-specific variable names. However, for some data users it may be useful to get the original instrument names. This function provides a quick way to do this, utilizing the metadata "NEPS_alias" stored within the datasets when being loaded with read_neps function.
-#'
+#' @noRd
 #' @keywords internal
 switch_var_names <- function(data){
   # get current variable names

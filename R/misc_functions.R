@@ -111,7 +111,8 @@ replace_season_codes <- function(data, vars = NULL, values_to_replace = c(21, 24
     # Select variables based on label if vars not provided
     if (is.null(vars)) {
       vars <- names(data)[sapply(data, has_month_label)] # find variables with label "month" or "monat"
-    } else {
+    }
+    else {
       # Validate provided variables exist in the dataframe
       if (!all(vars %in% names(data))) {
         stop("Some variables specified in 'vars' are not present in the data frame.")

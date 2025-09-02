@@ -121,7 +121,7 @@ artificial_datapoints <- data.frame(
 )
 
 # add these artificial datapoints to the empty neps dataset
-df_neps <- rbind(df_neps, artificial_datapoints)
+df_neps <- dplyr::bind_rows(df_neps, artificial_datapoints)
 print(df_neps)
 
 # now use the replace_values_with_na function
@@ -138,6 +138,7 @@ Use the function `replace_season_codes()` to revert these season codes to standa
 ```{r replace_season_codes}
 # read data with variables: "ID" and "enddate of episode"
 df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"), row_select = 0)
+attr(df_neps$ts2912m, "label")
 
 # create some artificial datapoints 
 artificial_datapoints <- data.frame(
@@ -146,9 +147,11 @@ artificial_datapoints <- data.frame(
 )
 
 # add these artificial datapoints to the empty neps dataset
-df_neps <- rbind(df_neps, artificial_datapoints)
+df_neps <- dplyr::bind_rows(df_neps, artificial_datapoints)
 print(df_neps)
+attr(df_neps$ts2912m, "label")
 
+# use the function to replace season codes with corresponding months
 df_month_recoded <- replace_season_codes(df_neps)
 print(df_month_recoded)
 ```
@@ -173,7 +176,7 @@ artificial_datapoints <- data.frame(
 )
 
 # add these artificial datapoints to the empty neps dataset
-df_neps <- rbind(df_neps, artificial_datapoints)
+df_neps <- dplyr::bind_rows(df_neps, artificial_datapoints)
 
 # generate date and duration variables
 df_neps <- df_neps |> 
