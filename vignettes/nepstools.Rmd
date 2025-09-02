@@ -26,37 +26,57 @@ This vignette introduces key functionalities for:
 - Extracting variable question texts with `question()`
 - Search for keywords in the attributes of the variables with `lookfor_meta()`
 
+Note that there is a NEPS semantic data file included in this package that only contains meta information and one row of NA values (these files are publicly available on the neps-data website and are therefore allowed to be in this package). This vignette occasionally includes artificial data added to the file to illustrate the package's features.
 
 ## 1. Reading NEPS data 
-The core of this package is the `read_neps()` function. It reads data from a NEPS Scientific Use File in **dta-format** and attaches associated metadata such as labels, question texts, and harmonization rules. 
+The core of this package is the `read_neps()` function. It reads data from a NEPS Scientific Use File in **dta-format** and attaches associated metadata such as labels, question texts, and harmonization rules as attributes of the variables in the dataframe. Moreover, it allows a language switch of labels and meta information from German to English. 
 
-At its core, the function uses `read_dta()` from the tidyverse package *haven*, which is very performant with larger datasets compared to other dta-readers. It does however not support reading (all) attached meta information in the NEPS-SUF-Files.
+Under the hood, the function relies on `read_dta()` from the tidyverse package *haven*, which is very performant with larger datasets compared to other dta-readers. It does however not support reading (all) attached meta information in the NEPS-SUF-Files.
 For this task the function `read.dta13()` from the package *readstata13* is utilized. Since it does not have to read the rows of the dataset to get access to the meta information, performance with large datasets isnt an issue.
 
-<!-- Arguments supported by read_neps(): -->
-<!-- 1. datasetpath: Path to the NEPS .dta file. -->
-<!-- 2. col_select: Optional vector of variables to select. -->
-<!-- 3. english: Logical, if TRUE loads English labels and metadata (The default value FALSE will load labels and metadata in German). -->
-<!-- 4. compact_meta: Logical, controls whether to load only key metadata or all of it. -->
-<!-- 5. charren: Logical, if TRUE, replaces variable names with original instrument names. -->
+With the arguments *col_select* and *row_select* you can specify the columns and rows that the function will read from the dataset. By default it will read all columns and rows.
+```{r }
+library(nepstools)
+
+# file path to NEPS semantic file on gaps in lifecourse that is included in this package
+path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
+
+# read data with all cols and rows
+df_neps <- read_neps(path)
+# print number of cols and rows
+print(ncol(df_neps))
+print(nrow(df_neps))
+# print head of df
+head(df_neps)
+
+# read data with variables ID_t and wave only and with 0 rows 
+df_neps <- read_neps(path, col_select = c("ID_t", "wave"), row_select = 0)
+# print number of cols and rows
+print(ncol(df_neps))
+print(nrow(df_neps))
+# print head of df
+head(df_neps)
+```
 
 When argument *english* is set to TRUE, all variable and value labels as well as attached meta information will be switched from German (default) to English:
 ```{r }
 library(nepstools)
 
-# File path to publicly available NEPS semantic file on gaps in lifecourse that is included in this package
+# file path to NEPS semantic file on gaps in lifecourse that is included in this package
 path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
 
 # read data with english labels and meta
 df_neps <- read_neps(path, english = TRUE)
-# Access label and questiontext attribute of a variable
+# access variable label, value label and questiontext attribute of a variable
 attr(df_neps$ts2912m, "label")
+attr(df_neps$ts2912m, "labels")
 attr(df_neps$ts2912m, "NEPS_questiontext")
 
 # read data with german labels and meta
 df_neps <- read_neps(path, english = FALSE)
-# Access label and questiontext attribute of a variable
+# access variable label, value label and questiontext attribute of a variable
 attr(df_neps$ts2912m, "label")
+attr(df_neps$ts2912m, "labels")
 attr(df_neps$ts2912m, "NEPS_questiontext")
 ```
 
@@ -92,7 +112,7 @@ print(df_neps)
 NEPS datasets use various negative codes to indicate different types of missing values. The `replace_values_with_na()` function replaces these codes by NA for easier handling in R.
 ```{r replace_values_with_na}
 # read data with variables: "ID" and "enddate of episode"
-df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"), row_select = 0) 
 
 # create some artificial datapoints 
 artificial_datapoints <- data.frame(
@@ -117,7 +137,7 @@ Use the function `replace_season_codes()` to revert these season codes to standa
 
 ```{r replace_season_codes}
 # read data with variables: "ID" and "enddate of episode"
-df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"), row_select = 0)
 
 # create some artificial datapoints 
 artificial_datapoints <- data.frame(
@@ -140,16 +160,16 @@ Often, episodes or spells are recorded with durations in months or years. The `e
 
 ```{r expand}
 # read data with variables: "ID" and "enddate of episode"
-df_neps <- read_neps(path, col_select = c("ID_t", "ts2911m", "ts2911y", "ts2912m", "ts2912y"))
-df_neps <- df_neps[-1,] # get rid of NA row that is in every semantic structure file from NEPS
+df_neps <- read_neps(path, col_select = c("ID_t", "ts2911m", "ts2911y", "ts2912m", "ts2912y"), row_select = 0)
 
 # create some artificial datapoints 
 artificial_datapoints <- data.frame(
-  ID_t = c(1, 2, 3, 4, 5),
-  ts2911m = c(2, 12, 11, 4, 12),
-  ts2911y = c(2008, 2006, 2005, 2009, 2010),
-  ts2912m = c(4, 1, 2, 5, 2),
-  ts2912y = c(2008, 2007, 2006, 2009, 2011)
+  ID_t = c(1, 1, 2, 2, 3),
+  sptype = c(24,26,25,26,27),
+  ts2911m = c(2, 5, 11, 3, 12),
+  ts2911y = c(2008, 2008, 2005, 2006, 2010),
+  ts2912m = c(4, 8, 2, 5, 1),
+  ts2912y = c(2008, 2008, 2006, 2006, 2011)
 )
 
 # add these artificial datapoints to the empty neps dataset

@@ -7,6 +7,7 @@
 read_neps(
   datasetpath,
   col_select = NULL,
+  row_select = Inf,
   english = FALSE,
   compact_meta = TRUE,
   charren = FALSE
@@ -16,6 +17,8 @@ read_neps(
 \item{datasetpath}{A datapath to a NEPS data file}
 
 \item{col_select}{Specify variables that will be included in the dataset. If set to NULL, data is being loaded with all available variables.}
+
+\item{row_select}{Specify maximum number of rows to read.}
 
 \item{english}{If set to TRUE, the dataset will be loaded with English variable and value labels, and metadata. If set to FALSE, German labels and metadata will be used instead.}
 

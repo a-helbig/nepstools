@@ -5,6 +5,7 @@
 #'
 #' @param datasetpath A datapath to a NEPS data file
 #' @param col_select Specify variables that will be included in the dataset. If set to NULL, data is being loaded with all available variables.
+#' @param row_select Specify maximum number of rows to read.
 #' @param english If set to TRUE, the dataset will be loaded with English variable and value labels, and metadata. If set to FALSE, German labels and metadata will be used instead.
 #' @param compact_meta If set to TRUE, only a selection of important metadata will be added to the data, including question texts, interviewer texts, harmonization rules, and instrument variable names. If set to FALSE, all available metadata will be included.
 #' @param charren If set to TRUE, instrument variable names will replace the standard variable names. If set to FALSE, the standard variable names will be retained.
@@ -18,7 +19,7 @@
 #' attr(df$luendm, "NEPS_questiontext_")
 #'
 #' @export
-read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_meta = TRUE, charren = FALSE) {
+read_neps <- function(datasetpath, col_select = NULL, row_select = Inf, english = FALSE, compact_meta = TRUE, charren = FALSE) {
   # prevents devtools::check() from complaining about Non-standard evaluation use in dplyr functions
   variable <- type <- value <- NULL
 
@@ -27,9 +28,9 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
   }
   # read data with haven::read_dta
   if(is.null(col_select))
-    data <- haven::read_dta(datasetpath)
+    data <- haven::read_dta(datasetpath, n_max = row_select)
   else
-    data <- haven::read_dta(datasetpath, col_select = dplyr::all_of(col_select))
+    data <- haven::read_dta(datasetpath, col_select = dplyr::all_of(col_select), n_max = row_select)
 
   # read expansionsfields with meta infos in neps data
   meta_data <- read_exp_fields(datasetpath)
@@ -51,7 +52,7 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
     names_of_val_labels <- meta_data |> dplyr::filter(type == "_lang_l_en")
 
     # extract attracted value labels from attribute 'label.table' as a named integer list. Suppress warnings here because some labels are missing and factor codes are being detected
-    suppressWarnings(label_table <- attr(readstata13::read.dta13(datasetpath, select.cols = "ID_t", select.rows = 1), 'label.table'))
+    suppressWarnings(label_table <- attr(readstata13::read.dta13(datasetpath, select.cols = 1, select.rows = 1), 'label.table'))
 
     # Loop through each variable in exp_fields
     for (i in 1:nrow(names_of_val_labels)) {
@@ -147,8 +148,8 @@ read_neps <- function(datasetpath, col_select = NULL, english = FALSE, compact_m
 #' @keywords internal
 read_exp_fields <- function(datapath) {
 
-  # Read the data with only the "ID_t" column and the first row for performance. We use the slower read.dta13 function here because it reads all attracted meta data while the faster  read_dta func from package haven does not
-  data <- readstata13::read.dta13(datapath, select.cols = "ID_t", select.rows = 1)
+  # Read the data with only the first column and the first row for performance. We use the slower read.dta13 function here because it reads all attracted meta data while the faster  read_dta func from package haven does not
+  data <- readstata13::read.dta13(datapath, select.cols = 1, select.rows = 1)
   # Extract the expansion fields attribute
   exp_fields <- attr(data, "expansion.fields")
   # check if there were expansion.fields, if not throw an informative error message

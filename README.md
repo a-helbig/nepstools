@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# nepstools
+# nepstools <a href="https://a-helbig.github.io/nepstools/"><img src="man/figures/logo.png" align="right" height="138" alt="nepstools website" /></a>
 
 <!-- badges: start -->
 
@@ -68,7 +68,7 @@ facilitate working with NEPS data:
 2.  `replace_season_codes()`: recoding season codes to corresponding
     months
 3.  `expand()`: expanding episode data by duration
-4.  `question()`: convenient wrapper for printing question texts
+4.  `question()`: wrapper of attr function for printing question texts
 5.  `lookfor_meta()`: searching for keywords in attributes of dataframe
     columns (meta info)
 

@@ -10,10 +10,16 @@ test_that("will the function error when a non-neps dataset is being loaded", {
   expect_error(read_neps(dp_non_neps_example), regexp = "Cannot find expected NEPS meta data in the dataset. Please provide a valid NEPS SUF .dta dataset.")
 })
 
-test_that("does the col select argument work?", {
+test_that("does the col_select argument work?", {
   expect_equal(ncol(read_neps(dp_semantic_neps_gap, col_select = "ID_t")), 1)
   expect_equal(ncol(read_neps(dp_semantic_neps_gap, col_select = NULL)), 36)
 })
+
+test_that("does the row_select argument work?", {
+  expect_equal(nrow(read_neps(dp_semantic_neps_gap, row_select = Inf)), 1)
+  expect_equal(nrow(read_neps(dp_semantic_neps_gap, row_select = 0)), 0)
+})
+
 
 test_that("does the english argument work?", {
   expect_equal(attr(read_neps(dp_semantic_neps_gap, english =T)$ID_t, "label"), "ID target")
