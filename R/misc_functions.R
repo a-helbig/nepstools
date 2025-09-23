@@ -291,6 +291,9 @@ question <- function(data, variable) {
 #' @param df A data frame whose columns' attributes will be searched.
 #' @param search_words A character vector of one or more keywords to search for within attributes.
 #' @param ignore.case Logical; if \code{TRUE} (default), the search is case-insensitive.
+#' @param attr_names Character vector specifying attribute names to restrict the search to.
+#'   If `NULL` (default), all attributes of each variable (column) are searched.
+#'   Only attributes with names matching one of the values in `attr_names` will be searched when provided.
 #'
 #' @return
 #' A named list of matched attribute values.
@@ -307,13 +310,16 @@ question <- function(data, variable) {
 #'
 #' # Search for keyword "type" to identify all variables dealing with the type of the gap in some way
 #' lookfor_meta(df_neps, "type")
-lookfor_meta <- function(df, search_words, ignore.case = TRUE) {
+lookfor_meta <- function(df, search_words, attr_names = NULL, ignore.case = TRUE) {
   # Check input types
   if (!is.data.frame(df)) {
     stop("Argument 'df' must be a data.frame.")
   }
   if (!(is.character(search_words) && length(search_words) >= 1)) {
     stop("Argument 'search_words' must be a character vector of length >= 1.")
+  }
+  if (!is.null(attr_names) && !(is.character(attr_names) && length(attr_names) >= 1)) {
+    stop("Argument 'attr_names' must be NULL or a character vector of length >= 1.")
   }
   if (!(is.logical(ignore.case) && length(ignore.case) == 1)) {
     stop("Argument 'ignore.case' must be a single logical value (TRUE or FALSE).")
@@ -322,7 +328,7 @@ lookfor_meta <- function(df, search_words, ignore.case = TRUE) {
   # Helper to check if any search word matches attribute's printed value
   attr_matches <- function(attr_value, words) {
     if (is.null(attr_value)) return(FALSE)
-    # Convert the attribute value to a single character string (capture.output(print()) handles complex attribute types by capturing their printed output)
+    # Convert the attribute value to a single character string
     attr_char <- paste(utils::capture.output(print(attr_value)), collapse = " ")
     # For each search word, check if it appears (grepl) in the attribute character string
     any(sapply(words, function(w) grepl(w, attr_char, ignore.case = ignore.case)))
@@ -336,8 +342,18 @@ lookfor_meta <- function(df, search_words, ignore.case = TRUE) {
     col_attrs <- attributes(df[[col_name]])
     if (length(col_attrs) == 0) next
 
-    # Loop over each attribute of the current column
-    for (attr_name in names(col_attrs)) {
+    # Decide which attributes to check:
+    # if attr_names is NULL, check all; else check only those attributes in attr_names that exist on the column
+    attrs_to_check <- if (is.null(attr_names)) {
+      names(col_attrs)
+    } else {
+      intersect(attr_names, names(col_attrs))
+    }
+
+    if (length(attrs_to_check) == 0) next
+
+    # Loop over each attribute name to check
+    for (attr_name in attrs_to_check) {
       # Check if this column attribute contains any of the search words by using the above helper
       if (attr_matches(col_attrs[[attr_name]], search_words)) {
         # If match found, add the match to the results list. Label it with column name and attribute name

@@ -432,3 +432,35 @@ test_that("multiple search words works", {
   expect_true(any(grepl("Variable y: @note", names(res))))
 })
 
+test_that("lookfor_meta respects attr_names argument", {
+  df <- data.frame(age = c(20, 30, 40), height = c(180, 175, 160))
+  attr(df$age, "label") <- "Age of person"
+  attr(df$age, "units") <- "years"
+  attr(df$height, "label") <- "Height in cm"
+  attr(df$height, "format") <- "integer"
+
+  # Searching in "label" attribute for "Age"
+  res1 <- lookfor_meta(df, "Age", attr_names = "label")
+  expect_true(any(grepl("Variable age: @label", names(res1))))
+  expect_match(res1[[grep("Variable age: @label", names(res1))]], "Age")
+
+  # Searching in "units" attribute for "Age" should find nothing
+  res2 <- lookfor_meta(df, "Age", attr_names = "units")
+  expect_null(res2)
+
+  # Without attr_names restriction, searching for "years" finds "units"
+  res3 <- lookfor_meta(df, "years")
+  expect_true(any(grepl("Variable age: @units", names(res3))))
+
+  # Searching multiple attributes at once - only format attribute contains "integer"
+  res4 <- lookfor_meta(df, "integer", attr_names = c("label", "format"))
+  expect_true(any(grepl("Variable height: @format", names(res4))))
+
+  # Case insensitive search within specified attr_names works
+  res5 <- lookfor_meta(df, "HEIGHT", attr_names = "label")
+  expect_true(any(grepl("Variable height: @label", names(res5))))
+
+  # Searching with attr_names that do not exist returns NULL
+  res6 <- lookfor_meta(df, "Age", attr_names = "nonexistent_attr")
+  expect_null(res6)
+})

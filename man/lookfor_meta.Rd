@@ -4,12 +4,16 @@
 \alias{lookfor_meta}
 \title{Search for keywords in attributes of variables}
 \usage{
-lookfor_meta(df, search_words, ignore.case = TRUE)
+lookfor_meta(df, search_words, attr_names = NULL, ignore.case = TRUE)
 }
 \arguments{
 \item{df}{A data frame whose columns' attributes will be searched.}
 
 \item{search_words}{A character vector of one or more keywords to search for within attributes.}
+
+\item{attr_names}{Character vector specifying attribute names to restrict the search to.
+If `NULL` (default), all attributes of each variable (column) are searched.
+Only attributes with names matching one of the values in `attr_names` will be searched when provided.}
 
 \item{ignore.case}{Logical; if \code{TRUE} (default), the search is case-insensitive.}
 }
