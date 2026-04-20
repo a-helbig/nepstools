@@ -7,7 +7,7 @@
 #' @param col_select Specify variables that will be included in the dataset. If set to NULL, data is being loaded with all available variables.
 #' @param row_select Specify maximum number of rows to read.
 #' @param english If set to TRUE, the dataset will be loaded with English variable and value labels, and metadata. If set to FALSE, German labels and metadata will be used instead.
-#' @param compact_meta If set to TRUE, only a selection of important metadata will be added to the data, including question texts, interviewer texts, harmonization rules, and instrument variable names. If set to FALSE, all available metadata will be included.
+#' @param compact_meta If set to TRUE, only a selection of important metadata will be added to the data, including question texts, interviewer texts, harmonization rules, and instrument variable names, if available. If set to FALSE, all available metadata will be included.
 #' @param charren If set to TRUE, instrument variable names will replace the standard variable names. If set to FALSE, the standard variable names will be retained.
 #'
 #' @returns A Dataframe.
@@ -55,7 +55,7 @@ read_neps <- function(datasetpath, col_select = NULL, row_select = Inf, english 
     suppressWarnings(label_table <- attr(readstata13::read.dta13(datasetpath, select.cols = 1, select.rows = 1), 'label.table'))
 
     # Loop through each variable in exp_fields
-    for (i in 1:nrow(names_of_val_labels)) {
+    for (i in seq_len(nrow(names_of_val_labels))) {
       variable_name <- names_of_val_labels$variable[i]
       value_name <- names_of_val_labels$value[i]
 
@@ -110,24 +110,37 @@ read_neps <- function(datasetpath, col_select = NULL, row_select = Inf, english 
 
   # Add specified meta info to data ---------------------------------------------
 
-  # filter meta data when compact_meta is selected
-  if(compact_meta){
-    meta <- meta[stringr::str_detect(meta, "(questiontext|interviewerinstruction|harmonization|alias)")]
+  # filter meta data when compact_meta is selected; if no compact meta types are found, attach no metadata
+  if (compact_meta && length(meta) > 0) {
+    keep_meta <- stringr::str_detect(meta, "(questiontext|interviewerinstruction|harmonization|alias)")
+    keep_meta[is.na(keep_meta)] <- FALSE
+
+    if (any(keep_meta)) {
+      meta <- meta[keep_meta]
+    } else {
+      meta <- character(0)
+    }
   }
 
   # filter meta_data with meta: this essentially gets rid of German or English meta infos depending on the english argument
   meta_data <- meta_data |>
     dplyr::filter(type %in% meta)
 
+  # if nothing remains, return data as-is; switch names if charren = TRUE
+  if (nrow(meta_data) == 0) {
+    if (charren) data <- switch_var_names(data)
+    return(data)
+  }
+
   # attract the meta data to the data
   # Loop through each row in meta_data and retrieve variable, value and type name.
-  for (i in 1:nrow(meta_data)) {
+  for (i in seq_len(nrow(meta_data))) {
     variable_name <- meta_data$variable[i]
     value_name <- meta_data$value[i]
     type_name <- meta_data$type[i]
 
     # Check if the variable in the meta df exists in dataframe data
-    if (variable_name %in% names(data)) {
+    if (length(variable_name) == 1 && nzchar(variable_name) && variable_name %in% names(data)) {
       # attract meta data to variables in data
       attr(data[[variable_name]], which = type_name) <- value_name
     }

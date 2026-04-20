@@ -22,7 +22,7 @@ read_neps(
 
 \item{english}{If set to TRUE, the dataset will be loaded with English variable and value labels, and metadata. If set to FALSE, German labels and metadata will be used instead.}
 
-\item{compact_meta}{If set to TRUE, only a selection of important metadata will be added to the data, including question texts, interviewer texts, harmonization rules, and instrument variable names. If set to FALSE, all available metadata will be included.}
+\item{compact_meta}{If set to TRUE, only a selection of important metadata will be added to the data, including question texts, interviewer texts, harmonization rules, and instrument variable names, if available. If set to FALSE, all available metadata will be included.}
 
 \item{charren}{If set to TRUE, instrument variable names will replace the standard variable names. If set to FALSE, the standard variable names will be retained.}
 }
