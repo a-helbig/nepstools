@@ -1,9 +1,9 @@
-pandoc: 3.1.11
+pandoc: 3.8.3
 pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   nepstools: nepstools.html
-last_built: 2026-04-20T11:13Z
+last_built: 2026-05-05T14:12Z
 urls:
   reference: https://a-helbig.github.io/nepstools/reference
   article: https://a-helbig.github.io/nepstools/articles

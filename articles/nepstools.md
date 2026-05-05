@@ -50,6 +50,7 @@ columns and rows that the function will read from the dataset. By
 default it will read all columns and rows.
 
 ``` r
+
 library(nepstools)
 
 # file path to NEPS semantic file on gaps in lifecourse that is included in this package
@@ -94,6 +95,7 @@ well as attached meta information will be switched from German (default)
 to English:
 
 ``` r
+
 library(nepstools)
 
 # file path to NEPS semantic file on gaps in lifecourse that is included in this package
@@ -154,6 +156,7 @@ interview-instruction-text, harmonization rule and alias. If set to
 FALSE, all available meta infos will be attached.
 
 ``` r
+
 # read data with minimum available meta info
 df_neps <- read_neps(path, compact_meta = TRUE)
 # show how many attributes are being attached to the data
@@ -173,6 +176,7 @@ more intuitive for some NEPS data users, as they are often more
 self-explanatory.
 
 ``` r
+
 # read data with minimum available meta info
 df_neps <- read_neps(path, charren = TRUE)
 # print names of dataset
@@ -214,6 +218,7 @@ missing values. The
 function replaces these codes by NA for easier handling in R.
 
 ``` r
+
 # read data with variables: "ID" and "enddate of episode"
 df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"), row_select = 0) 
 
@@ -263,6 +268,7 @@ are 21,24,27,30 and 32 and correspond to January (1 + 20), April (4 +
 to revert these season codes to standard month codes.
 
 ``` r
+
 # read data with variables: "ID" and "enddate of episode"
 df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"), row_select = 0)
 attr(df_neps$ts2912m, "label")
@@ -314,6 +320,7 @@ function replicates rows according to the length of a specified duration
 variable. This function is inspired by statas expand function.
 
 ``` r
+
 # read data with variables: "ID" and "enddate of episode"
 df_neps <- read_neps(path, col_select = c("ID_t", "ts2911m", "ts2911y", "ts2912m", "ts2912y"), row_select = 0)
 
@@ -407,6 +414,7 @@ depend on the argument english (TRUE or FALSE) in the
 function.
 
 ``` r
+
 # read data with variables: "ID" and "enddate of episode"
 df_neps <- read_neps(path, col_select = c("ID_t", "ts2912m"))
 
@@ -424,6 +432,7 @@ loaded with
 for specified keywords. It is case insensitive by default.
 
 ``` r
+
 # read data with variables: "ID" and "enddate of episode"
 df_neps <- read_neps(path, english = TRUE)
 

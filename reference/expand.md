@@ -34,6 +34,7 @@ A Dataframe.
 ## Examples
 
 ``` r
+
 path <- system.file("extdata", "SC6_spGap_S_15-0-0.dta", package = "nepstools")
 df_neps_ex <- read_neps(path, col_select = c("ID_t", "ts2911m", "ts2911y", "ts2912m", "ts2912y"))
 df_neps_ex <- df_neps_ex[-1,] # get rid of NA row that is in every semantic structure file from NEPS
