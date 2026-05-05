@@ -20,11 +20,21 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-This package facilitates working with R and NEPS SUF data. Its main feature — and the core of the package — is a function that efficiently reads NEPS SUF files in statas dta format. It allows you to specify German or English language, a switch to instrument variable names and access to all attached meta information on variables. It builds upon haven’s read_dta() and readstata13’s read.dta13() functions, leveraging the strengths of both. The package is inspired by the stata ado [nepstools](https://www.neps-data.de/Datenzentrum/Forschungsdaten/Datentools-f%C3%BCr-Stata) developed by the FDZ of the Lifbi in Bamberg, Germany.
+This package facilitates working with R and NEPS SUF data. Its main feature — and the core of the package — is a function that efficiently reads NEPS SUF files in Statas dta format. It allows you to specify German or English language, a switch to instrument variable names and access to all attached meta information on variables. It builds upon haven’s read_dta() and readstata13’s read.dta13() functions, leveraging the strengths of both. The package is inspired by the stata ado [nepstools](https://www.neps-data.de/Datenzentrum/Forschungsdaten/Datentools-f%C3%BCr-Stata) developed by the FDZ of the Lifbi in Bamberg, Germany.
+
+
+## Citation
+
+If this package contributes to your research, please consider citing it. I would greatly appreciate it.
+
+Suggested citation:
+
+Alexander Helbig (2026). *nepstools*. Version 0-1-3 [Computer software]. https://github.com/a-helbig/nepstools
+
 
 ## Installation
 
-You can install the development version of *nepstools* with remotes package like so:
+You can install *nepstools* with the remotes package as follows:
 
 ``` r
 # install.packages("remotes") - uncomment this row in case you havent installed package "remotes" yet
@@ -53,9 +63,11 @@ df_neps <- read_neps(path, english = TRUE)
 attr(df_neps$ts2912m, "label")
 # Print english questiontext with convenient wrapper nepstools::question()
 question(df_neps, "ts29103")
+# Search for the variable, that holds the type of gap with nepstools::lookfor_meta. Search only in the label attributes.
+lookfor_meta(df_neps, "type", "label")
 ```
 
-In addition the package provides a handful of smaller functions that facilitate working with NEPS data:
+The package provides a handful of smaller functions that facilitate working with NEPS data:
 
   1. `replace_values_with_na()`: replacing NEPS missing values with NA
   2. `replace_season_codes()`: recoding season codes to corresponding months
