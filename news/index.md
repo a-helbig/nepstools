@@ -2,7 +2,14 @@
 
 ## nepstools 0.1.4
 
+- Changed
+  [`replace_values_with_na()`](https://a-helbig.github.io/nepstools/reference/replace_values_with_na.md)
+  so that it now warns users when they specify variables that do not
+  exist in the provided dataset, and ignores those variables.
+
 ## nepstools 0.1.3
+
+- Added a citation suggestion to the README and a CITATION file.
 
 ## nepstools 0.1.2
 
