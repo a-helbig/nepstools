@@ -29,7 +29,7 @@ If this package contributes to your research, please consider citing it. I would
 
 Suggested citation:
 
-Alexander Helbig (2026). *nepstools*. Version 0-1-3 [Computer software]. https://github.com/a-helbig/nepstools
+Alexander Helbig (2026). *nepstools*. Version 0-1-4 [Computer software]. https://github.com/a-helbig/nepstools
 
 
 ## Installation
