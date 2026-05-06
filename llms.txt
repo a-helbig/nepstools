@@ -17,7 +17,7 @@ I would greatly appreciate it.
 
 Suggested citation:
 
-Alexander Helbig (2026). *nepstools*. Version 0-1-3 \[Computer
+Alexander Helbig (2026). *nepstools*. Version 0-1-4 \[Computer
 software\]. <https://github.com/a-helbig/nepstools>
 
 ## Installation
