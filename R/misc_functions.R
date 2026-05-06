@@ -32,25 +32,30 @@
 #' v <- c(1, -97, 3, -29, 5)
 #' replace_values_with_na(v)
 #'
-#'
 #' @export
-#'
-replace_values_with_na <- function(data, vars = NULL, values_to_replace = c(seq(-99, -90), seq(-56, -51), seq(-29, -22))) {
+replace_values_with_na <- function(data, vars = NULL,
+                                   values_to_replace = c(seq(-99, -90), seq(-56, -51), seq(-29, -22))) {
+
   # Case 1: If input is a dataframe
   if (is.data.frame(data)) {
     if (is.null(vars)) {
       # Use function on all variables in the dataframe
-      for (var in names(data)) {
-        for (value in values_to_replace) {
-          data[[var]][data[[var]] == value] <- NA
-        }
-      }
+      vars <- names(data)
     } else {
-      # Use function on selected variables in the dataframe
-      for (var in vars) {
-        for (value in values_to_replace) {
-          data[[var]][data[[var]] == value] <- NA
-        }
+      # Warn about missing variables and ignore them
+      missing_vars <- setdiff(vars, names(data))
+      if (length(missing_vars) > 0) {
+        warning(
+          "These variables were not found in data and will be ignored: ",
+          paste(missing_vars, collapse = ", ")
+        )
+      }
+      vars <- intersect(vars, names(data))
+    }
+
+    for (var in vars) {
+      for (value in values_to_replace) {
+        data[[var]][data[[var]] == value] <- NA
       }
     }
 

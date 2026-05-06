@@ -98,6 +98,40 @@ test_that("Works with multiple vars selected", {
   expect_equal(result$c[2:3], c(3, 4))
 })
 
+test_that("Warns and ignores missing variables in vars", {
+  df <- data.frame(
+    a = c(-99, 1, 2),
+    b = c(3, -56, 4)
+  )
+
+  expect_warning(
+    result <- replace_values_with_na(df, vars = c("a", "c")),
+    "These variables were not found in data and will be ignored:"
+  )
+
+  # Existing column is processed
+  expect_true(is.na(result$a[1]))
+
+  # Missing column is ignored, and existing untouched column remains unchanged
+  expect_equal(result$b, c(3, -56, 4))
+})
+
+test_that("Ignores missing variables without affecting existing selected ones", {
+  df <- data.frame(
+    a = c(-99, 1, 2),
+    b = c(3, -56, 4)
+  )
+
+  result <- suppressWarnings(
+    replace_values_with_na(df, vars = c("a", "c"))
+  )
+
+  # a is changed
+  expect_true(is.na(result$a[1]))
+
+  # b remains unchanged
+  expect_equal(result$b, c(3, -56, 4))
+})
 ################################################################################
 # test: replace_season_codes
 ################################################################################
