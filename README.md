@@ -90,5 +90,7 @@ working with NEPS data:
 4.  `question()`: wrapper of attr function for printing question texts
 5.  `lookfor_meta()`: searching for keywords in attributes of dataframe
     columns (meta info)
+6.  `rename_by_label()`: renaming variables based on the words of their
+    variable labels
 
 For more details, please checkout the *nepstools* vignette.
