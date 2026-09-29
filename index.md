@@ -89,7 +89,5 @@ working with NEPS data:
 5.  [`lookfor_meta()`](https://a-helbig.github.io/nepstools/reference/lookfor_meta.md):
     searching for keywords in attributes of dataframe columns (meta
     info)
-6.  [`rename_by_label()`](https://a-helbig.github.io/nepstools/reference/rename_by_label.md):
-    renaming variables based on the words of their variable labels
 
 For more details, please checkout the *nepstools* vignette.
