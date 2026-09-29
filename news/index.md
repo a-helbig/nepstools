@@ -1,5 +1,12 @@
 # Changelog
 
+## nepstools 0.1.5
+
+- Added
+  [`rename_by_label()`](https://a-helbig.github.io/nepstools/reference/rename_by_label.md),
+  which renames variables based on the words of their variable labels
+  (tidyselect support via `vars` / `exclude`).
+
 ## nepstools 0.1.4
 
 - Changed
