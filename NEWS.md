@@ -1,3 +1,7 @@
+# nepstools 0.1.5
+
+- Added `rename_by_label()`, which renames variables based on the words of their variable labels (tidyselect support via `vars` / `exclude`).
+
 # nepstools 0.1.4
 
 - Changed `replace_values_with_na()` so that it now warns users when they specify variables that do not exist in the provided dataset, and ignores those variables.
